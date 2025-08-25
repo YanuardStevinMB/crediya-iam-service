@@ -1,15 +1,14 @@
 package com.crediya.iam.r2dbc.entity;
 
 import jakarta.persistence.ManyToOne;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.data.relational.core.mapping.Column;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -17,9 +16,12 @@ import java.util.UUID;
  * mapeada mediante Spring Data R2DBC.
  */
 @Table("Usuario")
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
-@Builder
+@Builder(toBuilder = true)
+
 public class UserEntity {
 
     @Id
@@ -33,11 +35,10 @@ public class UserEntity {
     private String lastName;
 
     @Column("email")
-
     private String email;
 
     @Column("fecha_nacimiento")
-    private LocalDate birthdate;
+    private LocalDate  birthdate;
 
     @Column("documento_identidad")
     private String identityDocument;
@@ -45,11 +46,15 @@ public class UserEntity {
     @Column("telefono")
     private String phoneNumber;
 
+    @Column("direccion")
+    private String address;
+
     @Column("salario_base")
     private BigDecimal baseSalary;
 
     @Column("id_rol")
     private Long roleId;
+
 
 
 }

@@ -1,23 +1,12 @@
 server:
   port: 8080
 spring:
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
   application:
-    name: "crediya-iam-service"
+    name: "autenticacion"
   devtools:
     add-properties: false
-  h2:
-    console:
-      enabled: true
-      path: "/h2"
-  profiles:
-    include: null
-adapters:
-  r2dbc:
-    host: "localhost"
-    port: 3306
-    database: "mydatabase"
-    username: "admin"
-    password: "admin"
 
 
 management:

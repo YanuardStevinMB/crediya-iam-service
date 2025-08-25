@@ -1,12 +1,20 @@
 apply plugin: 'org.springframework.boot'
 
 dependencies {
+	implementation project(':shared')
 	implementation project(':reactive-web')
 	implementation 'org.reactivecommons.utils:object-mapper:0.1.0'
 	implementation project(':r2dbc-mysql')
     implementation project(':model')
     implementation project(':usecase')
+
     implementation 'org.springframework.boot:spring-boot-starter'
+
+//Liquibase para migraciones de bases de datos (basado en JDBC, independiente del entorno de ejecución de R2DBC)
+    implementation 'org.liquibase:liquibase-core'
+    runtimeOnly 'com.mysql:mysql-connector-j'
+
+
     runtimeOnly('org.springframework.boot:spring-boot-devtools')
     testImplementation 'com.tngtech.archunit:archunit:1.4.1'
     testImplementation 'com.fasterxml.jackson.core:jackson-databind'

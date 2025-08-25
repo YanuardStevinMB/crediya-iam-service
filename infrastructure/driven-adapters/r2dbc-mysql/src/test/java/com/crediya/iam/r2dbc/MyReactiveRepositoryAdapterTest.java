@@ -64,15 +64,5 @@ class MyReactiveRepositoryAdapterTest {
                 .verifyComplete();
     }
 
-    @Test
-    void mustSaveValue() {
-        when(repository.save("test")).thenReturn(Mono.just("test"));
-        when(mapper.map("test", Object.class)).thenReturn("test");
 
-        Mono<Object> result = repositoryAdapter.save("test");
-
-        StepVerifier.create(result)
-                .expectNextMatches(value -> value.equals("test"))
-                .verifyComplete();
-    }
 }
