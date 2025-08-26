@@ -24,7 +24,7 @@ public class UserReactiveRepositoryAdapter extends ReactiveAdapterOperations<
         > implements UserRepository {
 
     private final UserEntityMapper userEntityMapper;
-    private final RoleReactiveRepository roleRepository; // <- para validar existencia del rol
+    private final RoleReactiveRepository roleRepository;
 
     public UserReactiveRepositoryAdapter(UserReactiveRepository repository,
                                          UserEntityMapper userEntityMapper,
@@ -58,7 +58,7 @@ public class UserReactiveRepositoryAdapter extends ReactiveAdapterOperations<
                     var entity = userEntityMapper.toEntity(user);
                     return repository.save(entity);
                 })
-                // 3) Volver al dominio y loguear resultado (sin CTX_KEY)
+
                 .map(userEntityMapper::toDomain)
                 .doOnSuccess(saved -> log.info("[user.save] id={} email={} roleId={}",
                         saved.getId(), saved.getEmail(), saved.getRoleId()))

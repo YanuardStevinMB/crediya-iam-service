@@ -39,7 +39,6 @@ public interface UserEntityMapper {
                 entity.getRoleId()
         );
 
-        // Asignar ID después de crear el usuario
         return user.withId(entity.getId());
     }
 }

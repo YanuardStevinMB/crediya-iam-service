@@ -1,0 +1,83 @@
+# .dockerignore para optimizar el contexto de Docker
+# Excluir archivos innecesarios del contexto de construcción
+
+# Directorios de construcción
+**/build/
+**/target/
+build/
+target/
+
+# Directorios de Gradle
+**/.gradle/
+.gradle/
+
+# Directorios de IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.settings/
+.project
+.classpath
+.factorypath
+
+# Logs
+logs/
+*.log
+*.log.*
+
+# Archivos temporales
+.tmp/
+tmp/
+
+# Sistema operativo
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Docker
+docker-compose*.yml
+Dockerfile*
+.dockerignore
+
+# Documentación y README (mantener solo el principal)
+*.md
+!README.md
+
+# Node modules (si existen)
+node_modules/
+npm-debug.log*
+
+# Archivos de configuración local
+*.env
+*.env.local
+*.env.production
+*.env.development
+
+# Backups
+*.bak
+*.backup
+*.old
+
+# Archivos comprimidos
+*.tar.gz
+*.zip
+*.rar
+
+# Archivos específicos del proyecto que no se necesitan
+.editorconfig
+
+# Directorios específicos que pueden existir
+coverage/
+test-results/
+allure-results/

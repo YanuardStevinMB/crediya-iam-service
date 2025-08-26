@@ -10,21 +10,20 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.context.bean.override.mockito.MockitoBean; // 👈 NUEVO
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import reactor.core.publisher.Mono;
 
 import static org.mockito.ArgumentMatchers.any;
 
 @WebFluxTest
-@ContextConfiguration(classes = { RouterRest.class })   // solo el router
-@Import(ApiErrorFilter.class)                            // filtro real
+@ContextConfiguration(classes = { RouterRest.class })
+@Import(ApiErrorFilter.class)
 class RouterRestTest {
 
     @Autowired
     private WebTestClient webTestClient;
 
-    // 👇 reemplaza @MockBean por @MockitoBean
     @MockitoBean
     private UserHandler handler;
 

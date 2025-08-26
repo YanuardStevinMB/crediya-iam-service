@@ -9,7 +9,7 @@ import org.springframework.data.relational.core.mapping.Table;
 
 import java.util.UUID;
 
-@Table("Rol") // Nombre de la tabla en la BD
+@Table("Rol")
 @Getter
 @Setter
 @Builder

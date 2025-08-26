@@ -14,7 +14,7 @@ import java.time.LocalDate;
 public class UserDto {
 
 
-    private Long id; // Identificador único del usuario
+    private Long id;
 
 
     private String firstName;

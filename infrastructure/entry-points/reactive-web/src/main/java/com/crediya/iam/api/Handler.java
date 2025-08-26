@@ -19,7 +19,7 @@ private  final IUserUseCase useCase;
     public Mono<ServerResponse> listenPOSTUseCase(ServerRequest serverRequest) {
         return serverRequest
                 .bodyToMono(User.class)
-                .flatMap(useCase::execute) // ✅ aquí se pasa la referencia al método
+                .flatMap(useCase::execute)
                 .flatMap(userSaved -> ServerResponse.ok().bodyValue(userSaved));
     }
 

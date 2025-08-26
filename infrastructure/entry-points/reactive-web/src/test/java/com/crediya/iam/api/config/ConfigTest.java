@@ -38,14 +38,12 @@ class ConfigTest {
                 .uri("/__probe")
                 .exchange()
                 .expectStatus().isOk()
-                // 🔎 Sé flexible: distintas infraestructuras pueden formatear estos headers.
                 .expectHeader().exists("Content-Security-Policy")
                 .expectHeader().exists("Strict-Transport-Security")
                 .expectHeader().valueEquals("X-Content-Type-Options", "nosniff")
                 .expectHeader().exists("Referrer-Policy")
                 .expectHeader().exists("Cache-Control")
                 .expectHeader().exists("Pragma")
-                // Muchas veces el header 'Server' simplemente no existe
                 .expectHeader().doesNotExist("Server");
     }
 }

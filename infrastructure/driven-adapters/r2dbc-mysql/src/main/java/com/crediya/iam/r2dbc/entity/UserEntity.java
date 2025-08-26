@@ -26,7 +26,7 @@ public class UserEntity {
 
     @Id
     @Column("id_usuario")
-    private Long id; // Identificador único del usuario
+    private Long id;
 
     @Column("nombre")
     private String firstName;

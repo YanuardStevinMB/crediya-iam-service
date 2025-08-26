@@ -33,7 +33,7 @@ class UserReactiveRepositoryAdapterTest {
     UserEntityMapper userEntityMapper;
 
     @Mock
-    ObjectMapper mapper; // usado por la superclase, no por save()
+    ObjectMapper mapper;
 
     @InjectMocks
     UserReactiveRepositoryAdapter adapter;

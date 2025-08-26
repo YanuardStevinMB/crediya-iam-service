@@ -22,7 +22,6 @@ import java.util.UUID;
 )
 public interface UserMapper {
 
-    // Manual factory-based mapping due to domain factory method
     default User toModel(UserSaveDto dto) {
         if (dto == null) return null;
         return User.create(

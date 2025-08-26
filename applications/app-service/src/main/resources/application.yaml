@@ -37,7 +37,7 @@ logging:
     name: logs/iam-app.log    # crea (y sobreescribe al arrancar) logs/iam-app.log
   level:
     root: INFO
-    com.crediya.iam: INFO    # tu código a DEBUG; súbelo/bájalo según necesites
-    io.r2dbc.mysql: WARN      # menos ruido del driver
+    com.crediya.iam: INFO
+    io.r2dbc.mysql: WARN
     org.springframework.r2dbc: INFO
 

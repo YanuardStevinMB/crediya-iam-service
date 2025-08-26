@@ -21,7 +21,6 @@ public class ApiErrorFilter implements HandlerFilterFunction<ServerResponse, Ser
 
     @Override
     public Mono<ServerResponse> filter(ServerRequest req, HandlerFunction<ServerResponse> next) {
-        // ❌ NO declares nada como "Object ApiErrorUtils;"
         return next.handle(req)
                 // === Específicas ===
                 .onErrorResume(EmailDuplicadoException.class,

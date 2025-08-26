@@ -8,7 +8,7 @@ import java.util.UUID;
  */
 public final class Role {
 
-    private Long id; // Identificador único del rol
+    private Long id;
     private String name;
     private String description;
 

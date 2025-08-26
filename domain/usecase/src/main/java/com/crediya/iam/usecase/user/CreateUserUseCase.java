@@ -105,6 +105,6 @@ public class CreateUserUseCase implements IUserUseCase{
         if (s.compareTo(SALARIO_MIN) < 0 || s.compareTo(SALARIO_MAX) > 0) {
             return new SalaryValidateException("El salario debe estar entre 0 y 15,000,000");
         }
-        return null; // válido
+        return null;
     }
 }

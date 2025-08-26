@@ -10,9 +10,7 @@ public interface TransactionGateway {
     <T> Mono<T> required(Supplier<Mono<T>> work);
     <T> Flux<T> requiredMany(Supplier<Flux<T>> work);
 
-    // Opcional: control de aislamiento/timeout/readOnly
     default <T> Mono<T> requiredWith(TransactionOptions opts, Supplier<Mono<T>> work) {
-        // Implementado en el adapter. Aquí opcionalmente puedes lanzar UnsupportedOperationException si no lo implementas.
         return required(work);
     }
 

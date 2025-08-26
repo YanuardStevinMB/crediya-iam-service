@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  # Base de datos MySQL
+  mysql-db:
+    image: mysql:8.0
+    container_name: crediya-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password_123
+      MYSQL_DATABASE: crediya_iam
+      MYSQL_USER: crediya_user
+      MYSQL_PASSWORD: crediya_pass123
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - crediya-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_password_123"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # Aplicación Spring Boot
+  crediya-iam-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: crediya-iam-service
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - DB_HOST=mysql-db
+      - DB_PORT=3306
+      - DB_NAME=crediya_iam
+      - DB_USERNAME=crediya_user
+      - DB_PASSWORD=crediya_pass123
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    networks:
+      - crediya-network
+    volumes:
+      - app_logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+# Volumes para persistencia de datos
+volumes:
+  mysql_data:
+    name: crediya_mysql_data
+  app_logs:
+    name: crediya_app_logs
+
+# Red personalizada para comunicación entre servicios
+networks:
+  crediya-network:
+    name: crediya-network
+    driver: bridge
