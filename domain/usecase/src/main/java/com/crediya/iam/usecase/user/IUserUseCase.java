@@ -18,7 +18,7 @@ public interface IUserUseCase {
      * @param user modelo de dominio User
      * @return Mono con el DTO del usuario guardado
      */
-    Mono<User> save(User user);
+    Mono<User> execute(User user);
 
 
 }

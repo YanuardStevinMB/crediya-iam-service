@@ -1,5 +1,6 @@
 package com.crediya.iam.api.userMapper;
 
+import com.crediya.iam.api.dto.UserResponseDto;
 import com.crediya.iam.api.dto.UserSaveDto;
 import com.crediya.iam.model.user.User;
 import com.crediya.iam.shared.mappers.DateMapper;
@@ -37,5 +38,8 @@ public interface UserMapper {
                 dto.roleId()        // Long
         );
     }
+
+    UserResponseDto toResponseDto(User model);
+
 }
 
