@@ -2,11 +2,11 @@ package com.crediya.iam.api;
 
 import com.crediya.iam.api.controller.AuthHandler;
 import com.crediya.iam.api.controller.UserHandler;
-import com.crediya.iam.api.dto.LoginRequestDto;
-import com.crediya.iam.api.dto.LoginResponseDto;
-import com.crediya.iam.api.dto.UserResponseDto;
-import com.crediya.iam.api.dto.UserSaveDto;
+import com.crediya.iam.api.controller.UserValidatedExistHandler;
+import com.crediya.iam.api.dto.*;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -107,19 +107,48 @@ public class RouterRest {
                             }
                     )
 
+            ),
+            // POST /api/usecase/path
+            @RouterOperation(
+                    path = "/api/v1/users/exist",
+                    method = RequestMethod.POST,
+                    beanClass = UserValidatedExistHandler.class,
+                    beanMethod = "loadExistUser",
+                    operation = @Operation(
+                            operationId = "existUser",
+                            summary = "Validación de usuario",
+                            description = "Valida si un usuario existe a través de documento y correo",
+                            tags = {"IAM API"},
+                            requestBody = @RequestBody(
+                                    required = true,
+                                    content = @Content(
+                                            schema = @Schema(implementation = UserExistRequestDto.class)
+                                    )
+                            ),
+                            responses = {
+                                    @ApiResponse(
+                                            responseCode = "200",
+                                            description = "Cliente validado",
+                                            content = @Content(
+                                                    schema = @Schema(implementation = ApiResponse.class)
+                                            )
+                                    ),
+                                    @ApiResponse(responseCode = "400", description = "Error de validación"),
+                                    @ApiResponse(responseCode = "409", description = "Correo no pertenece al documento registrado")
+                            }
+                    )
             )
     })
     public RouterFunction<ServerResponse> routerFunction(
             Handler handler,
             UserHandler userHandler,
-            AuthHandler authHandler
+            AuthHandler authHandler,
+            UserValidatedExistHandler userValidatedExistHandler
     ) {
         return route(
                 GET("/api/usecase/path"), handler::listenGETUseCase)
                 .andRoute(POST("/api/v1/usuarios"), userHandler::save)
-
-                .andRoute(POST("/api/usecase/otherpath"), handler::listenPOSTUseCase)
-                .andRoute(GET("/api/otherusercase/path"), handler::listenGETOtherUseCase)
+                .andRoute(POST("/api/v1/users/exist"), userValidatedExistHandler::loadExistUser)
                 .andRoute(POST("/api/v1/login"), authHandler::login);
     }
 }

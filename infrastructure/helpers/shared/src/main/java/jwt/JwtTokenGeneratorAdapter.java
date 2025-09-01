@@ -6,6 +6,7 @@ import com.crediya.iam.usecase.authenticate.TokenResult;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
@@ -15,6 +16,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 
+@Slf4j
 @Component
 public class JwtTokenGeneratorAdapter implements TokenGeneratorPort {
 
@@ -27,18 +29,12 @@ public class JwtTokenGeneratorAdapter implements TokenGeneratorPort {
     }
 
     @Override
-    public Mono<TokenResult> generate(User user) {
+    public Mono<TokenResult> generate(User user, String role) {
         long now = Instant.now().getEpochSecond();
         long exp = now + props.getExpirationSec();
 
-        // Si tu User NO tiene roles por nombre, ajusta este mapeo:
-        // Ejemplo: roleId 1=CLIENTE, 2=ASESOR, 3=ADMIN (ajusta a tu realidad)
-        List<String> roles = switch (String.valueOf(user.getRoleId())) {
-            case "3" -> List.of("ADMIN");
-            case "1" -> List.of("ADMIN");
-            case "2" -> List.of("ASESOR");
-            default -> List.of("CLIENTE");
-        };
+        log.info("Generando token para usuario: {} con rol: {}", user.getEmail(), role);
+        List<String> roles = List.of(role); // <- SIN "ROLE_"
 
         String token = Jwts.builder()
                 .setSubject(String.valueOf(user.getId()))
@@ -46,10 +42,12 @@ public class JwtTokenGeneratorAdapter implements TokenGeneratorPort {
                 .setIssuedAt(new Date(now * 1000))
                 .setExpiration(new Date(exp * 1000))
                 .claim("email", user.getEmail())
-                .claim("roles", roles)           // <-- lista de strings
-                .claim("roleId", user.getRoleId()) // <-- por si quieres usar ID
+                .claim("roles", roles)           // <-- rol aplicado
+                .claim("roleId", user.getRoleId())
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
+
+        log.info("Token generado para usuario {}: {}", user.getEmail(), token);
 
         return Mono.just(new TokenResult(token, "Bearer", exp));
     }

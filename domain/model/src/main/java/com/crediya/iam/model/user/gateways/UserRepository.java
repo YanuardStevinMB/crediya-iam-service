@@ -15,6 +15,7 @@ public interface UserRepository {
      */
     Mono<Boolean> existsByMail(String mail);
 
+    Mono<User> existUserForDocument(String document);
 
     Mono<User> findByEmail(String mail);
     /**

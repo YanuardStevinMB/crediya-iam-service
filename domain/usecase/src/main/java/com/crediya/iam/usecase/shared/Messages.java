@@ -24,9 +24,15 @@ public final class Messages {
     public static final String EMAIL_REQUIRED      = "El correo electrónico es obligatorio";
     public static final String EMAIL_INVALID       = "El correo electrónico no tiene un formato válido";
     public static final String EMAIL_DUPLICATED    = "El correo electrónico ya está registrado";
+    public static final String EMAIL_DIFERENT    = "El correo no pertenece al mismo registrado en la plataforma";
 
     // Salario
     public static final String SALARY_REQUIRED     = "El salario debe ser un valor numérico entre 0 y 15,000,000";
     public static final String SALARY_DECIMALS     = "El salario admite máximo 2 decimales";
     public static final String SALARY_RANGE        = "El salario debe estar entre 0 y 15,000,000";
+
+    //Login
+    public static final String INVALID_CREDENTIALS        = "Credenciales inválidas";
+    //role
+    public static final String ROLE_NOT_FOUND   = "Rol no encontrado";
 }

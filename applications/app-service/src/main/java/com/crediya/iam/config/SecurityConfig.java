@@ -38,6 +38,8 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.POST, "/api/v1/login").permitAll()
                         // Regla por rol
                         .pathMatchers(HttpMethod.POST, "/api/v1/usuarios").hasAnyRole("ADMIN","ASESOR")
+                        // Regla datos de usuario
+                        .pathMatchers(HttpMethod.POST, "/api/v1/usuarios").hasAnyRole("ADMIN","ASESOR","CLIENTE")
                         // Resto autenticado
                         .anyExchange().authenticated()
                 )
