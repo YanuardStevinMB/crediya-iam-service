@@ -3,8 +3,7 @@ package com.crediya.iam.api;
 
 import com.crediya.iam.api.dto.ApiResponse;
 import com.crediya.iam.usecase.user.exceptions.ForeignKeyViolationException;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.server.*;
@@ -40,21 +39,5 @@ final class ApiErrorUtils {
                 Map.of("field", field, "value", ex.getValue(), "code", "FK_VIOLATION"));
     }
 
-    static Object violationsToList(ConstraintViolationException ex) {
-        return ex.getConstraintViolations().stream()
-                .map(v -> Map.of(
-                        "field", v.getPropertyPath().toString(),
-                        "message", v.getMessage(),
-                        "invalidValue", safeValue(v)
-                ))
-                .collect(Collectors.toList());
-    }
 
-    private static Object safeValue(ConstraintViolation<?> v) {
-        try {
-            return v.getInvalidValue();
-        } catch (Exception e) {
-            return null;
-        }
-    }
 }

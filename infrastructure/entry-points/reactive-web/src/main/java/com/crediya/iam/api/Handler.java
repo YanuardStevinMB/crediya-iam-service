@@ -1,27 +1,33 @@
 package com.crediya.iam.api;
 
-import com.crediya.iam.model.user.User;
-import com.crediya.iam.usecase.user.IUserUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import org.springframework.security.access.prepost.PreAuthorize;
 import reactor.core.publisher.Mono;
 
 @Component
 @RequiredArgsConstructor
 public class Handler {
-
-
-private  final IUserUseCase useCase;
+//private  final UseCase useCase;
 //private  final UseCase2 useCase2;
 
-    public Mono<ServerResponse> listenPOSTUseCase(ServerRequest serverRequest) {
-        return serverRequest
-                .bodyToMono(User.class)
-                .flatMap(useCase::execute)
-                .flatMap(userSaved -> ServerResponse.ok().bodyValue(userSaved));
+    @PreAuthorize("hasRole('permissionGET')")
+    public Mono<ServerResponse> listenGETUseCase(ServerRequest serverRequest) {
+        // useCase.logic();
+        return ServerResponse.ok().bodyValue("");
     }
 
+    @PreAuthorize("hasRole('permissionGETOther')")
+    public Mono<ServerResponse> listenGETOtherUseCase(ServerRequest serverRequest) {
+        // useCase2.logic();
+        return ServerResponse.ok().bodyValue("");
+    }
 
+    @PreAuthorize("hasRole('permissionPOST')")
+    public Mono<ServerResponse> listenPOSTUseCase(ServerRequest serverRequest) {
+        // useCase.logic();
+        return ServerResponse.ok().bodyValue("");
+    }
 }

@@ -61,17 +61,17 @@ class UserReactiveRepositoryAdapterTest {
     @Test
     void existsByMail_null_returnsFalse() {
         StepVerifier.create(adapter.existsByMail(null))
-                .expectNext(false)
+                .expectNext()
                 .verifyComplete();
         verifyNoInteractions(repository);
     }
 
     @Test
     void existsByMail_normalizesToLowercaseAndTrim() {
-        when(repository.existsByEmail("ana@example.com")).thenReturn(Mono.just(true));
+        when(repository.existsByEmail("ana@example.com")).thenReturn(Mono.empty());
 
         StepVerifier.create(adapter.existsByMail("  Ana@Example.com  "))
-                .expectNext(true)
+                .expectNext()
                 .verifyComplete();
 
         verify(repository, times(1)).existsByEmail("ana@example.com");

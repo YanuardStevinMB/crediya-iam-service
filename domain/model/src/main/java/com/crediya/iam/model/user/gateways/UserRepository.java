@@ -14,6 +14,9 @@ public interface UserRepository {
      * @return Mono emitting true if the user exists, false otherwise
      */
     Mono<Boolean> existsByMail(String mail);
+
+
+    Mono<User> findByEmail(String mail);
     /**
      * Persists a user in the repository.
      *

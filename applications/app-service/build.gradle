@@ -19,11 +19,13 @@ dependencies {
     testImplementation 'com.tngtech.archunit:archunit:1.4.1'
     testImplementation 'com.fasterxml.jackson.core:jackson-databind'
 
+    implementation "org.springdoc:springdoc-openapi-starter-webflux-ui:2.5.0"
 
 
 
         implementation "org.springframework.boot:spring-boot-starter-security"
         implementation "org.springframework.boot:spring-boot-starter-webflux"
+
 
 }
 

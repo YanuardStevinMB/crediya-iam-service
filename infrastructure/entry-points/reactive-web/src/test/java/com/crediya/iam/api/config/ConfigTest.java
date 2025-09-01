@@ -1,49 +1,36 @@
 package com.crediya.iam.api.config;
 
-import com.crediya.iam.api.ApiErrorFilter;
+import com.crediya.iam.api.Handler;
+import com.crediya.iam.api.RouterRest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.web.reactive.function.server.RouterFunction;
-import org.springframework.web.reactive.function.server.ServerResponse;
 
-import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
-import static org.springframework.web.reactive.function.server.RouterFunctions.route;
-
+@ContextConfiguration(classes = {RouterRest.class, Handler.class})
 @WebFluxTest
-@ContextConfiguration(classes = { ConfigTest.TestRoutes.class }) // 👈 ruta dummy para probar filtros
-@Import({ CorsConfig.class, SecurityHeadersConfig.class, ApiErrorFilter.class })
+@Import({CorsConfig.class, SecurityHeadersConfig.class})
 class ConfigTest {
 
     @Autowired
     private WebTestClient webTestClient;
 
-    // Pequeño router para probar los headers de los filtros/config
-    @Configuration
-    static class TestRoutes {
-        @Bean
-        RouterFunction<ServerResponse> probeRoute() {
-            return route(GET("/__probe"), req -> ServerResponse.ok().bodyValue("ok"));
-        }
-    }
-
     @Test
     void corsConfigurationShouldAllowOrigins() {
         webTestClient.get()
-                .uri("/__probe")
+                .uri("/api/usecase/path")
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().exists("Content-Security-Policy")
-                .expectHeader().exists("Strict-Transport-Security")
+                .expectHeader().valueEquals("Content-Security-Policy",
+                        "default-src 'self'; frame-ancestors 'self'; form-action 'self'")
+                .expectHeader().valueEquals("Strict-Transport-Security", "max-age=31536000;")
                 .expectHeader().valueEquals("X-Content-Type-Options", "nosniff")
-                .expectHeader().exists("Referrer-Policy")
-                .expectHeader().exists("Cache-Control")
-                .expectHeader().exists("Pragma")
-                .expectHeader().doesNotExist("Server");
+                .expectHeader().valueEquals("Server", "")
+                .expectHeader().valueEquals("Cache-Control", "no-store")
+                .expectHeader().valueEquals("Pragma", "no-cache")
+                .expectHeader().valueEquals("Referrer-Policy", "strict-origin-when-cross-origin");
     }
+
 }

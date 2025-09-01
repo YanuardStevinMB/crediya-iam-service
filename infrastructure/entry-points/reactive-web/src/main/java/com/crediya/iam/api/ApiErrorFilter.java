@@ -1,7 +1,6 @@
 package com.crediya.iam.api;
 
 import com.crediya.iam.usecase.user.exceptions.*;
-import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.HandlerFilterFunction;
@@ -49,9 +48,6 @@ public class ApiErrorFilter implements HandlerFilterFunction<ServerResponse, Ser
                         ex -> respond(req, HttpStatus.BAD_REQUEST, ex.getMessage(),
                                 Map.of("code", ex.getCode())))
 
-                .onErrorResume(ConstraintViolationException.class,
-                        ex -> respond(req, HttpStatus.BAD_REQUEST,
-                                "Datos de entrada inválidos", violationsToList(ex)))
 
                 .onErrorResume(IllegalArgumentException.class,
                         ex -> respond(req, HttpStatus.BAD_REQUEST, "Solicitud inválida", ex.getMessage()))
@@ -61,10 +57,7 @@ public class ApiErrorFilter implements HandlerFilterFunction<ServerResponse, Ser
                     Throwable e = Exceptions.unwrap(t);
                     if (e instanceof ForeignKeyViolationException fk) {
                         return handleFk(req, fk);
-                    } else if (e instanceof ConstraintViolationException ve) {
-                        return respond(req, HttpStatus.BAD_REQUEST,
-                                "Datos de entrada inválidos", violationsToList(ve));
-                    } else if (e instanceof EmailDuplicadoException dupe) {
+                    }  else if (e instanceof EmailDuplicadoException dupe) {
                         return respond(req, HttpStatus.CONFLICT,
                                 "Email duplicado", Map.of("email", dupe.getEmail(), "code", dupe.getCode()));
                     } else if (e instanceof RoleNotFoundException rnfe) {

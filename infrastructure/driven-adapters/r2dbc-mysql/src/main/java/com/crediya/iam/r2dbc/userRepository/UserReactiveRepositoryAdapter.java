@@ -42,6 +42,13 @@ public class UserReactiveRepositoryAdapter extends ReactiveAdapterOperations<
     }
 
     @Override
+    public Mono<User> findByEmail(String mail) {
+        if(mail== null) return Mono.empty();
+        return repository.findByEmail(mail.trim().toLowerCase(Locale.ROOT));
+
+    }
+
+    @Override
     public Mono<User> save(User user) {
         // 1) Validar que el roleId venga y exista en BD
         Long roleId = user.getRoleId();
