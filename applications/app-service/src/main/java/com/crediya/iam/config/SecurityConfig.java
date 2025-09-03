@@ -1,5 +1,6 @@
 package com.crediya.iam.config;
 
+import com.crediya.iam.security.jwt.JwtProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -13,7 +14,7 @@ import reactor.core.publisher.Mono;
 
 @Configuration
 @EnableWebFluxSecurity
-@EnableConfigurationProperties(jwt.JwtProperties.class) // expone tus props de JWT
+@EnableConfigurationProperties(JwtProperties .class) // expone tus props de JWT
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final BearerSecurityContextRepository contextRepo;
@@ -34,6 +35,8 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/webjars/**",
                                 "/actuator/**").permitAll()
+                        // regla de lista
+                        .pathMatchers(HttpMethod.GET, "/api/v1/usuarios").hasAnyRole("ADMIN","ASESOR")
                         // Login abierto
                         .pathMatchers(HttpMethod.POST, "/api/v1/login").permitAll()
                         // Regla por rol

@@ -2,9 +2,7 @@ package com.crediya.iam.model.role;
 
 import lombok.*;
 
-/**
- * Representa un rol dentro del sistema IAM (Identity and Access Management).
- */
+
 @Getter
 @Setter
 @Builder

@@ -18,6 +18,8 @@ public interface UserRepository {
     Mono<User> existUserForDocument(String document);
 
     Mono<User> findByEmail(String mail);
+    Flux<User> findAll();
+
     /**
      * Persists a user in the repository.
      *

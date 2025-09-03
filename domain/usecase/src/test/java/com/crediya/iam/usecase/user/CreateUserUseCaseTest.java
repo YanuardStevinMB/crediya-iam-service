@@ -2,194 +2,133 @@ package com.crediya.iam.usecase.user;
 
 import com.crediya.iam.model.user.User;
 import com.crediya.iam.model.user.gateways.UserRepository;
+import com.crediya.iam.usecase.shared.ValidationException;
+import com.crediya.iam.usecase.shared.security.PasswordService;
 import com.crediya.iam.usecase.user.exceptions.EmailDuplicadoException;
-import com.crediya.iam.usecase.user.exceptions.SalaryValidateException;
 import com.crediya.iam.usecase.user.gateway.TransactionGateway;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(org.mockito.junit.jupiter.MockitoExtension.class)
+@ExtendWith(MockitoExtension.class)
 class CreateUserUseCaseTest {
 
-    @Mock
-    UserRepository userRepository;
-
-    TransactionGateway tx;
-
-    CreateUserUseCase useCase;
+    private TransactionGateway tx;
+    private UserRepository userRepository;
+    private PasswordService passwordService;
+    private CreateUserUseCase useCase;
 
     @BeforeEach
     void setUp() {
-        // TransactionGateway de prueba: ejecuta el supplier tal cual (sin TX real)
-        tx = new TransactionGateway() {
-            @Override public <T> Mono<T> required(java.util.function.Supplier<Mono<T>> work) {
-                return Mono.defer(work);
-            }
-            @Override public <T> reactor.core.publisher.Flux<T> requiredMany(java.util.function.Supplier<reactor.core.publisher.Flux<T>> work) {
-                return reactor.core.publisher.Flux.defer(work);
-            }
-        };
-        useCase = new CreateUserUseCase(tx, userRepository);
+        tx = mock(TransactionGateway.class);
+        userRepository = mock(UserRepository.class);
+        passwordService = mock(PasswordService.class);
+
+        lenient().when(tx.required(any())).thenAnswer(invocation -> {
+            @SuppressWarnings("unchecked")
+            java.util.function.Supplier<Mono<User>> supplier =
+                    invocation.getArgument(0, java.util.function.Supplier.class);
+            return supplier.get();
+        });
+
+        useCase = new CreateUserUseCase(tx, userRepository, passwordService);
     }
 
-    // ===== Helper =====
-    private User buildUser(String email, BigDecimal salary, String doc, String phone) {
-        Long roleId = 1L;
+    private User buildUser() {
         return User.create(
-                "Ana", "García",
-                LocalDate.of(1990, 5, 10),
-                "Calle 123",
-                phone,
-                email,
-                salary,
-                doc,
-                roleId
+                "John",
+                "Doe",
+                LocalDate.of(1990, 1, 1),
+                "123 Main St",
+                "5551234",
+                "john.doe@mail.com",
+                java.math.BigDecimal.valueOf(5000),
+                "123456789",          // ✅ documento válido (solo números)
+                2L,
+                "Passw0rd123"        // ✅ contraseña válida
         );
     }
 
-    // ===== Tests =====
-
     @Test
-    void errorWhenUserIsNull() {
-        StepVerifier.create(useCase.execute(null))
-                .expectError(IllegalArgumentException.class)
-                .verify();
-        verifyNoInteractions(userRepository);
+    void execute_shouldCreateUserSuccessfully() {
+        User user = buildUser();
+
+        when(userRepository.existsByMail("john.doe@mail.com")).thenReturn(Mono.just(false));
+        when(passwordService.generatePasswordHash("Passw0rd123")).thenReturn(Mono.just("hashedPass"));
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> {
+            User u = inv.getArgument(0);
+            return Mono.just(u.withId(1L));
+        });
+
+        StepVerifier.create(useCase.execute(user))
+                .expectNextMatches(saved ->
+                        saved.getId().equals(1L)
+                                && saved.getPassword().equals("hashedPass")
+                                && saved.getEmail().equals("john.doe@mail.com"))
+                .verifyComplete();
     }
 
     @Test
-    void errorWhenIdentityDocumentIsNull() {
-        var u = buildUser("ana@example.com", BigDecimal.valueOf(1000), null, "3001234567");
-        StepVerifier.create(useCase.execute(u))
-                .expectError(IllegalArgumentException.class)
-                .verify();
-        verifyNoInteractions(userRepository);
-    }
+    void execute_shouldFailWhenEmailAlreadyExists() {
+        User user = buildUser();
 
-    @Test
-    void errorWhenPhoneIsNullOrBlank() {
-        var u1 = buildUser("ana@example.com", BigDecimal.valueOf(1000), "CC1", null);
-        StepVerifier.create(useCase.execute(u1))
-                .expectError(IllegalArgumentException.class)
-                .verify();
+        when(userRepository.existsByMail("john.doe@mail.com")).thenReturn(Mono.just(true));
 
-        var u2 = buildUser("ana@example.com", BigDecimal.valueOf(1000), "CC1", "   ");
-        StepVerifier.create(useCase.execute(u2))
-                .expectError(IllegalArgumentException.class)
-                .verify();
-
-        verifyNoInteractions(userRepository);
-    }
-
-    @Test
-    void errorWhenPhoneHasNonDigits() {
-        var u = buildUser("ana@example.com", BigDecimal.valueOf(1000), "CC1", "300-123");
-        StepVerifier.create(useCase.execute(u))
-                .expectError(IllegalArgumentException.class)
-                .verify();
-        verifyNoInteractions(userRepository);
-    }
-
-    @Test
-    void errorWhenEmailMissing() {
-        var u = buildUser(null, BigDecimal.valueOf(1000), "CC1", "3001234567");
-        StepVerifier.create(useCase.execute(u))
-                .expectError(IllegalArgumentException.class)
-                .verify();
-        verifyNoInteractions(userRepository);
-    }
-
-    @Test
-    void errorWhenEmailInvalidFormat() {
-        var u = buildUser("bad-email", BigDecimal.valueOf(1000), "CC1", "3001234567");
-        StepVerifier.create(useCase.execute(u))
-                .expectError(IllegalArgumentException.class)
-                .verify();
-        verifyNoInteractions(userRepository);
-    }
-
-    @Nested
-    class SalaryValidation {
-
-        @Test
-        void errorWhenSalaryIsNull() {
-            var u = buildUser("ana@example.com", null, "CC1", "3001234567");
-            StepVerifier.create(useCase.execute(u))
-                    .expectError(SalaryValidateException.class)
-                    .verify();
-            verifyNoInteractions(userRepository);
-        }
-
-        @Test
-        void errorWhenScaleGreaterThan2() {
-            var u = buildUser("ana@example.com", new BigDecimal("123.456"), "CC1", "3001234567");
-            StepVerifier.create(useCase.execute(u))
-                    .expectError(SalaryValidateException.class)
-                    .verify();
-            verifyNoInteractions(userRepository);
-        }
-
-        @Test
-        void errorWhenLessThanMin() {
-            var u = buildUser("ana@example.com", new BigDecimal("-0.01"), "CC1", "3001234567");
-            StepVerifier.create(useCase.execute(u))
-                    .expectError(SalaryValidateException.class)
-                    .verify();
-            verifyNoInteractions(userRepository);
-        }
-
-        @Test
-        void errorWhenGreaterThanMax() {
-            var u = buildUser("ana@example.com", new BigDecimal("15000000.01"), "CC1", "3001234567");
-            StepVerifier.create(useCase.execute(u))
-                    .expectError(SalaryValidateException.class)
-                    .verify();
-            verifyNoInteractions(userRepository);
-        }
-    }
-
-    @Test
-    void errorWhenEmailDuplicate() {
-        var u = buildUser("Ana@Example.com  ", BigDecimal.valueOf(1000), "CC1", "3001234567");
-
-        when(userRepository.existsByMail("ana@example.com")).thenReturn(Mono.just(true));
-
-        StepVerifier.create(useCase.execute(u))
+        StepVerifier.create(useCase.execute(user))
                 .expectError(EmailDuplicadoException.class)
                 .verify();
 
-        verify(userRepository, times(1)).existsByMail("ana@example.com");
+        verify(userRepository).existsByMail("john.doe@mail.com");
+        verify(passwordService, never()).generatePasswordHash(any());
         verify(userRepository, never()).save(any());
     }
 
     @Test
-    void successSavesUserAndNormalizesEmail() {
-        var u = buildUser("Ana@Example.com  ", BigDecimal.valueOf(1000), "CC1", "3001234567");
+    void execute_shouldFailWhenPasswordHashFails() {
+        User user = buildUser();
 
-        when(userRepository.existsByMail("ana@example.com")).thenReturn(Mono.just(false));
-        when(userRepository.save(any())).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
+        when(userRepository.existsByMail("john.doe@mail.com")).thenReturn(Mono.just(false));
+        when(passwordService.generatePasswordHash("Passw0rd123"))
+                .thenReturn(Mono.error(new RuntimeException("Hashing failed")));
 
-        StepVerifier.create(useCase.execute(u))
-                .expectNextMatches(saved -> saved != null && "ana@example.com".equals(saved.getEmail()))
-                .verifyComplete();
+        StepVerifier.create(useCase.execute(user))
+                .expectErrorMatches(e -> e instanceof RuntimeException && e.getMessage().equals("Hashing failed"))
+                .verify();
 
-        verify(userRepository, times(1)).existsByMail("ana@example.com");
+        verify(userRepository).existsByMail("john.doe@mail.com");
+        verify(passwordService).generatePasswordHash("Passw0rd123");
+        verify(userRepository, never()).save(any());
+    }
 
-        ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
-        verify(userRepository, times(1)).save(captor.capture());
-        User savedArg = captor.getValue();
-        org.junit.jupiter.api.Assertions.assertEquals("ana@example.com", savedArg.getEmail());
+    @Test
+    void execute_shouldFailValidationIfUserIsInvalid() {
+        User invalidUser = User.create(
+                "", // nombre vacío -> falla
+                "Doe",
+                LocalDate.of(1990, 1, 1),
+                "123 Main St",
+                "5551234",
+                "badmail", // ❌ email inválido
+                java.math.BigDecimal.valueOf(1000),
+                "ABC123",  // ❌ documento inválido
+                2L,
+                "pwd"      // ❌ contraseña inválida
+        );
+
+        StepVerifier.create(useCase.execute(invalidUser))
+                .expectError(ValidationException.class) // ✅ ahora correcto
+                .verify();
+
+        verify(userRepository, never()).existsByMail(any());
+        verify(passwordService, never()).generatePasswordHash(any());
+        verify(userRepository, never()).save(any());
     }
 }

@@ -20,14 +20,7 @@ public class AuthHandler {
     private final AuthenticateUseCase authenticate;
     private final UserMapper mapper;
     private final Validator validator;
-//
-//    private <T> Mono<T> validate(T body) {
-//        var violations = validator.validate(body);
-//        if (!violations.isEmpty()) {
-//            return Mono.error(new ConstraintViolationException(violations));
-//        }
-//        return Mono.just(body);
-//    }
+
 
     public Mono<ServerResponse> login(ServerRequest req) {
         return req.bodyToMono(LoginRequestDto.class)

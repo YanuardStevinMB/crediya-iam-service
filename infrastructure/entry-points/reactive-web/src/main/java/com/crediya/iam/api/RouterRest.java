@@ -5,8 +5,6 @@ import com.crediya.iam.api.controller.UserHandler;
 import com.crediya.iam.api.controller.UserValidatedExistHandler;
 import com.crediya.iam.api.dto.*;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -30,20 +28,29 @@ public class RouterRest {
 
     @Bean
     @RouterOperations({
-            // GET /api/usecase/path
+            // GET /api/v1/usuarios -> listar usuarios
             @RouterOperation(
-                    path = "/api/usecase/path",
+                    path = "/api/v1/usuarios",
                     method = RequestMethod.GET,
-                    beanClass = Handler.class,
-                    beanMethod = "listenGETUseCase",
+                    beanClass = UserHandler.class,
+                    beanMethod = "list",
                     operation = @Operation(
-                            operationId = "getUseCase",
-                            summary = "Consultar caso de uso (GET)",
-                            description = "Retorna datos del caso de uso (ejemplo GET)",
-                            tags = {"IAM API"}
+                            operationId = "listUsers",
+                            summary = "Listar usuarios",
+                            description = "Retorna la lista de usuarios",
+                            tags = {"IAM API"},
+                            responses = {
+                                    @ApiResponse(
+                                            responseCode = "200",
+                                            description = "Usuarios recuperados",
+                                            content = @Content(schema = @Schema(implementation = ApiResponse.class))
+                                    ),
+                                    @ApiResponse(responseCode = "404", description = "Usuarios no encontrados"),
+                                    @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+                            }
                     )
             ),
-            // POST /api/cxc  -> Crear usuario
+            // POST /api/v1/usuarios -> crear usuario
             @RouterOperation(
                     path = "/api/v1/usuarios",
                     method = RequestMethod.POST,
@@ -56,33 +63,26 @@ public class RouterRest {
                             tags = {"IAM API"},
                             requestBody = @RequestBody(
                                     required = true,
-                                    content = @Content(
-                                            schema = @Schema(implementation = UserSaveDto.class)
-                                    )
+                                    content = @Content(schema = @Schema(implementation = UserSaveDto.class))
                             ),
                             responses = {
                                     @ApiResponse(
                                             responseCode = "200",
                                             description = "Usuario creado",
-                                            content = @Content(
-                                                    schema = @Schema(implementation = UserResponseDto.class)
-                                            )
+                                            content = @Content(schema = @Schema(implementation = UserResponseDto.class))
                                     ),
                                     @ApiResponse(responseCode = "400", description = "Error de validación"),
-                                    @ApiResponse(responseCode = "409", description = "Email duplicado")
+                                    @ApiResponse(responseCode = "409", description = "Email duplicado"),
+                                    @ApiResponse(responseCode = "500", description = "Error interno del servidor")
                             }
                     )
             ),
-
-
-            // POST /api/v1/login
+            // POST /api/v1/login -> login
             @RouterOperation(
                     path = "/api/v1/login",
                     method = RequestMethod.POST,
                     beanClass = AuthHandler.class,
                     beanMethod = "login",
-
-
                     operation = @Operation(
                             operationId = "login",
                             summary = "Login de usuario",
@@ -90,25 +90,21 @@ public class RouterRest {
                             tags = {"IAM API"},
                             requestBody = @RequestBody(
                                     required = true,
-                                    content = @Content(
-                                            schema = @Schema(implementation = LoginRequestDto.class)
-                                    )
+                                    content = @Content(schema = @Schema(implementation = LoginRequestDto.class))
                             ),
                             responses = {
                                     @ApiResponse(
                                             responseCode = "200",
-                                            description = "Usuario creado",
-                                            content = @Content(
-                                                    schema = @Schema(implementation = LoginResponseDto.class)
-                                            )
+                                            description = "Autenticación exitosa",
+                                            content = @Content(schema = @Schema(implementation = LoginResponseDto.class))
                                     ),
-                                    @ApiResponse(responseCode = "400", description = "Autenticación exitosa"),
-                                    @ApiResponse(responseCode = "409", description = "Credenciales inválidas")
+                                    @ApiResponse(responseCode = "400", description = "Error de validación"),
+                                    @ApiResponse(responseCode = "401", description = "Credenciales inválidas"),
+                                    @ApiResponse(responseCode = "500", description = "Error interno del servidor")
                             }
                     )
-
             ),
-            // POST /api/usecase/path
+            // POST /api/v1/users/exist -> validar existencia de usuario
             @RouterOperation(
                     path = "/api/v1/users/exist",
                     method = RequestMethod.POST,
@@ -121,32 +117,27 @@ public class RouterRest {
                             tags = {"IAM API"},
                             requestBody = @RequestBody(
                                     required = true,
-                                    content = @Content(
-                                            schema = @Schema(implementation = UserExistRequestDto.class)
-                                    )
+                                    content = @Content(schema = @Schema(implementation = UserExistRequestDto.class))
                             ),
                             responses = {
                                     @ApiResponse(
                                             responseCode = "200",
                                             description = "Cliente validado",
-                                            content = @Content(
-                                                    schema = @Schema(implementation = ApiResponse.class)
-                                            )
+                                            content = @Content(schema = @Schema(implementation = ApiResponse.class))
                                     ),
                                     @ApiResponse(responseCode = "400", description = "Error de validación"),
-                                    @ApiResponse(responseCode = "409", description = "Correo no pertenece al documento registrado")
+                                    @ApiResponse(responseCode = "409", description = "Correo no pertenece al documento registrado"),
+                                    @ApiResponse(responseCode = "500", description = "Error interno del servidor")
                             }
                     )
             )
     })
     public RouterFunction<ServerResponse> routerFunction(
-            Handler handler,
             UserHandler userHandler,
             AuthHandler authHandler,
             UserValidatedExistHandler userValidatedExistHandler
     ) {
-        return route(
-                GET("/api/usecase/path"), handler::listenGETUseCase)
+        return route(GET("/api/v1/usuarios"), userHandler::list)
                 .andRoute(POST("/api/v1/usuarios"), userHandler::save)
                 .andRoute(POST("/api/v1/users/exist"), userValidatedExistHandler::loadExistUser)
                 .andRoute(POST("/api/v1/login"), authHandler::login);

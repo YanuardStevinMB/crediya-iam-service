@@ -1,149 +1,124 @@
 package com.crediya.iam.model.user;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Date;
-import java.util.UUID; // 👈 necesario
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserTest {
 
-    @Nested
-    @DisplayName("Factory: create(...)")
-    class FactoryTests {
-        @Test
-        @DisplayName("Asigna campos, hace trim donde aplica y normaliza email a minúsculas")
-        void factoryCreate_setsFields_trim_and_normalizesEmail() {
-            // Arrange
-            String firstName = "  Juan  ";
-            String lastName = "  Pérez ";
-            LocalDate birthdate = LocalDate.of(1990, 5, 10);
-            String address = " Calle 123 ";
-            String phone = " 300 123 4567 ";
-            String email = "  Foo.BAR@Mail.COM ";
-            BigDecimal salary = new BigDecimal("12345.67");
-            String identity = "  CC123  ";
-            Long roleId = 2L;
+    @Test
+    void create_shouldInitializeUserCorrectly() {
+        User user = User.create(
+                "John",
+                "Doe",
+                LocalDate.of(1990, 1, 1),
+                "123 Main St",
+                "5551234",
+                "john.doe@mail.com",
+                BigDecimal.valueOf(5000),
+                "123456789",
+                2L,
+                "Passw0rd123"
+        );
 
-            // Act
-            User u = User.create(firstName, lastName, birthdate, address, phone, email, salary, identity, roleId);
-
-            // Assert
-            assertNull(u.getId());
-            assertEquals("Juan", u.getFirstName());
-            assertEquals("Pérez", u.getLastName());
-            assertEquals(LocalDate.of(1990, 5, 10), u.getBirthdate());
-            assertEquals(" Calle 123 ", u.getAddress()); // setter no hace trim de address (diseño actual)
-            assertEquals("300 123 4567", u.getPhoneNumber()); // trim
-            assertEquals("foo.bar@mail.com", u.getEmail());    // trim + lowercase
-            assertEquals(0, new BigDecimal("12345.67").compareTo(u.getBaseSalary()));
-            assertEquals("CC123", u.getIdentityDocument());
-            assertEquals(2L, u.getRoleId());
-        }
-    }
-
-    @Nested
-    @DisplayName("withId(...)")
-    class WithIdTests {
-        @Test
-        @DisplayName("Asigna el id y retorna la MISMA instancia (patrón fluido)")
-        void withId_setsId_and_returnsSameInstance() {
-            User u = User.create("A", "B", LocalDate.of(2000,1,1),
-                    "Addr", "300", "a@b.com", new BigDecimal("0"), "ID", 1L);
-
-            assertNull(u.getId());
-
-            User returned = u.withId(99L);
-
-            assertSame(u, returned, "withId debe devolver la MISMA instancia");
-            assertEquals(99L, u.getId());
-        }
-    }
-
-    @Nested
-    @DisplayName("Getters/Setters y normalizaciones")
-    class GettersSettersTests {
-        @Test
-        @DisplayName("Trim en firstName/lastName/identity/phone; email a minúsculas; nulos permitidos")
-        void setters_handleTrimAndNulls() {
-            User u = new User();
-
-            u.setFirstName("  Ana  ");
-            u.setLastName("  Gómez ");
-            u.setIdentityDocument("  ABC123  ");
-            u.setPhoneNumber("  555  ");
-            u.setEmail("  XyZ@Example.COM  ");
-
-            assertEquals("Ana", u.getFirstName());
-            assertEquals("Gómez", u.getLastName());
-            assertEquals("ABC123", u.getIdentityDocument());
-            assertEquals("555", u.getPhoneNumber());
-            assertEquals("xyz@example.com", u.getEmail());
-
-            // Nulos
-            u.setFirstName(null);
-            u.setLastName(null);
-            u.setIdentityDocument(null);
-            u.setPhoneNumber(null);
-            u.setEmail(null);
-
-            assertNull(u.getFirstName());
-            assertNull(u.getLastName());
-            assertNull(u.getIdentityDocument());
-            assertNull(u.getPhoneNumber());
-            assertNull(u.getEmail());
-        }
-
-        @Test
-        @DisplayName("Asigna birthdate y baseSalary sin transformaciones inesperadas")
-        void birthdate_and_salary_basicSetGet() {
-            User u = new User();
-            LocalDate d = LocalDate.of(2020, 2, 29);
-            BigDecimal s = new BigDecimal("15000000.00");
-
-            u.setBirthdate(d);
-            u.setBaseSalary(s);
-
-            assertEquals(LocalDate.of(2020, 2, 29), u.getBirthdate());
-            assertEquals(0, new BigDecimal("15000000.00").compareTo(u.getBaseSalary()));
-        }
-
-        @Test
-        @DisplayName("Address se asigna tal cual (sin trim según el modelo actual)")
-        void address_isAssignedVerbatim() {
-            User u = new User();
-            u.setAddress("  Av Siempre Viva  ");
-            assertEquals("  Av Siempre Viva  ", u.getAddress());
-        }
+        assertNotNull(user);
+        assertEquals("John", user.getFirstName());
+        assertEquals("Doe", user.getLastName());
+        assertEquals(LocalDate.of(1990, 1, 1), user.getBirthdate());
+        assertEquals("123 Main St", user.getAddress());
+        assertEquals("5551234", user.getPhoneNumber());
+        assertEquals("john.doe@mail.com", user.getEmail());
+        assertEquals(BigDecimal.valueOf(5000), user.getBaseSalary());
+        assertEquals("123456789", user.getIdentityDocument());
+        assertEquals(2L, user.getRoleId());
+        assertEquals("Passw0rd123", user.getPassword());
+        assertTrue(user.getActive()); // ✅ por defecto siempre true
+        assertNull(user.getId()); // no se asigna en factory
     }
 
     @Test
-    @DisplayName("Constructor con UUID/Date no inicializa (hoy no hace nada) — cubierto para elevar cobertura")
-    void weirdConstructor_doesNothingButIsSafe() {
-        UUID someId = UUID.randomUUID();  // 👈 usa UUID, no Long
-        Date birth = new Date();
+    void withId_shouldAssignIdAndReturnSameUser() {
+        User user = User.create(
+                "Jane",
+                "Smith",
+                LocalDate.of(1985, 5, 20),
+                "456 Elm St",
+                "9876543",
+                "jane.smith@mail.com",
+                BigDecimal.valueOf(6000),
+                "DOC999",
+                3L,
+                "Secret123"
+        );
 
-        // Firma actual del constructor “raro” en tu modelo:
-        // User(UUID id, String firstName, String lastName, String email, Date birthdate,
-        //      String address, String s, BigDecimal bigDecimal, String s1, UUID uuid)
-        User u = new User(someId, "N", "L", "E", birth, "A", "S",
-                new BigDecimal("1.00"), "S1", someId);
+        User returned = user.withId(10L);
 
-        // Como la implementación está vacía, los campos del modelo quedan en null
-        assertNull(u.getId());
-        assertNull(u.getFirstName());
-        assertNull(u.getLastName());
-        assertNull(u.getEmail());
-        assertNull(u.getBirthdate());
-        assertNull(u.getAddress());
-        assertNull(u.getPhoneNumber());
-        assertNull(u.getBaseSalary());
-        assertNull(u.getIdentityDocument());
-        assertNull(u.getRoleId());
+        assertSame(user, returned); // retorna misma instancia
+        assertEquals(10L, user.getId());
+    }
+
+    @Test
+    void builder_shouldBuildUserWithAllFields() {
+        User user = User.builder()
+                .id(99L)
+                .firstName("Alice")
+                .lastName("Wonder")
+                .birthdate(LocalDate.of(2000, 12, 31))
+                .address("789 Oak St")
+                .phoneNumber("111222333")
+                .email("alice@mail.com")
+                .baseSalary(BigDecimal.valueOf(7000))
+                .identityDocument("DOC777")
+                .roleId(5L)
+                .active(false)
+                .password("builderPwd")
+                .build();
+
+        assertNotNull(user);
+        assertEquals(99L, user.getId());
+        assertEquals("Alice", user.getFirstName());
+        assertEquals("Wonder", user.getLastName());
+        assertEquals(LocalDate.of(2000, 12, 31), user.getBirthdate());
+        assertEquals("789 Oak St", user.getAddress());
+        assertEquals("111222333", user.getPhoneNumber());
+        assertEquals("alice@mail.com", user.getEmail());
+        assertEquals(BigDecimal.valueOf(7000), user.getBaseSalary());
+        assertEquals("DOC777", user.getIdentityDocument());
+        assertEquals(5L, user.getRoleId());
+        assertFalse(user.getActive());
+        assertEquals("builderPwd", user.getPassword());
+    }
+
+    @Test
+    void settersAndGetters_shouldModifyValues() {
+        User user = new User();
+        user.setId(50L);
+        user.setFirstName("Bob");
+        user.setLastName("Marley");
+        user.setBirthdate(LocalDate.of(1975, 6, 15));
+        user.setAddress("Some Street");
+        user.setPhoneNumber("444555666");
+        user.setEmail("bob@mail.com");
+        user.setBaseSalary(BigDecimal.valueOf(8000));
+        user.setIdentityDocument("DOC555");
+        user.setRoleId(9L);
+        user.setActive(true);
+        user.setPassword("pwd123");
+
+        assertEquals(50L, user.getId());
+        assertEquals("Bob", user.getFirstName());
+        assertEquals("Marley", user.getLastName());
+        assertEquals(LocalDate.of(1975, 6, 15), user.getBirthdate());
+        assertEquals("Some Street", user.getAddress());
+        assertEquals("444555666", user.getPhoneNumber());
+        assertEquals("bob@mail.com", user.getEmail());
+        assertEquals(BigDecimal.valueOf(8000), user.getBaseSalary());
+        assertEquals("DOC555", user.getIdentityDocument());
+        assertEquals(9L, user.getRoleId());
+        assertTrue(user.getActive());
+        assertEquals("pwd123", user.getPassword());
     }
 }
+

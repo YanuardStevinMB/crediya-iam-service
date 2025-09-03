@@ -35,4 +35,6 @@ public final class Messages {
     public static final String INVALID_CREDENTIALS        = "Credenciales inválidas";
     //role
     public static final String ROLE_NOT_FOUND   = "Rol no encontrado";
+    //Usuarios
+    public  static  final  String USERS_NOT_FOUND= "Usuarios no entcontrados";
 }

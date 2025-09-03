@@ -23,107 +23,138 @@ import static org.mockito.Mockito.*;
 @ExtendWith(org.mockito.junit.jupiter.MockitoExtension.class)
 class UserReactiveRepositoryAdapterTest {
 
-    @Mock
-    UserReactiveRepository repository;
-
-    @Mock
-    RoleReactiveRepository roleRepository;
-
-    @Mock
-    UserEntityMapper userEntityMapper;
-
-    @Mock
-    ObjectMapper mapper;
-
-    @InjectMocks
-    UserReactiveRepositoryAdapter adapter;
+    private UserReactiveRepository repository;
+    private UserEntityMapper userEntityMapper;
+    private RoleReactiveRepository roleRepository;
+    private UserReactiveRepositoryAdapter adapter;
+    private ObjectMapper objectMapper;
 
     @BeforeEach
-    void init() {
-        adapter = new UserReactiveRepositoryAdapter(repository, userEntityMapper, mapper, roleRepository);
-    }
+    void setUp() {
+        repository = mock(UserReactiveRepository.class);
+        userEntityMapper = mock(UserEntityMapper.class);
+        roleRepository = mock(RoleReactiveRepository.class);
+        objectMapper = mock(ObjectMapper.class);
 
-    private User buildUser(String email, Long roleId) {
-        return User.create(
-                "Ana", "García",
-                LocalDate.of(1990, 5, 10),
-                "Calle 123",
-                "3001234567",
-                email,
-                new BigDecimal("1200.50"),
-                "CC1",
-                roleId
-        );
+        adapter = new UserReactiveRepositoryAdapter(repository, userEntityMapper, objectMapper, roleRepository);
     }
-
-    // ---------- existsByMail -----------
 
     @Test
-    void existsByMail_null_returnsFalse() {
+    void existsByMail_shouldReturnTrueWhenExists() {
+        when(repository.existsByEmail("test@mail.com")).thenReturn(Mono.just(true));
+
+        StepVerifier.create(adapter.existsByMail("TEST@mail.com"))
+                .expectNext(true)
+                .verifyComplete();
+
+        verify(repository).existsByEmail("test@mail.com");
+    }
+
+    @Test
+    void existsByMail_shouldReturnFalseWhenNull() {
         StepVerifier.create(adapter.existsByMail(null))
-                .expectNext()
+                .expectNext(false)
                 .verifyComplete();
-        verifyNoInteractions(repository);
+
+        verify(repository, never()).existsByEmail(any());
     }
 
     @Test
-    void existsByMail_normalizesToLowercaseAndTrim() {
-        when(repository.existsByEmail("ana@example.com")).thenReturn(Mono.empty());
+    void findByEmail_shouldReturnUserWhenExists() {
+        User user = new User();
+        user.setEmail("user@mail.com");
 
-        StepVerifier.create(adapter.existsByMail("  Ana@Example.com  "))
-                .expectNext()
+        when(repository.findByEmail("user@mail.com")).thenReturn(Mono.just(user));
+
+        StepVerifier.create(adapter.findByEmail(" user@mail.com "))
+                .expectNextMatches(u -> u.getEmail().equals("user@mail.com"))
                 .verifyComplete();
-
-        verify(repository, times(1)).existsByEmail("ana@example.com");
     }
 
-    // ---------- save -----------
+    @Test
+    void findByEmail_shouldReturnEmptyWhenNull() {
+        StepVerifier.create(adapter.findByEmail(null))
+                .verifyComplete();
+        verify(repository, never()).findByEmail(any());
+    }
 
     @Test
-    void save_roleIdNull_errors() {
-        var u = buildUser("ana@example.com", null);
+    void existUserForDocument_shouldMapEntityToDomain() {
+        UserEntity entity = new UserEntity();
+        entity.setId(1L);
+        entity.setIdentityDocument("123");
+        entity.setEmail("doc@mail.com");
 
-        StepVerifier.create(adapter.save(u))
-                .expectErrorMatches(e -> e instanceof IllegalArgumentException &&
-                        e.getMessage().contains("roleId es obligatorio"))
+        User domain = new User();
+        domain.setId(1L);
+        domain.setIdentityDocument("123");
+        domain.setEmail("doc@mail.com");
+
+        when(repository.existUserForDocument("123")).thenReturn(Mono.just(entity));
+        when(userEntityMapper.toDomain(entity)).thenReturn(domain);
+
+        StepVerifier.create(adapter.existUserForDocument("123"))
+                .expectNextMatches(u -> u.getEmail().equals("doc@mail.com"))
+                .verifyComplete();
+    }
+
+    @Test
+    void existUserForDocument_shouldReturnEmptyWhenNull() {
+        StepVerifier.create(adapter.existUserForDocument(null))
+                .verifyComplete();
+        verify(repository, never()).existUserForDocument(any());
+    }
+
+    @Test
+    void save_shouldFailWhenRoleIdIsNull() {
+        User user = new User();
+        user.setEmail("x@mail.com");
+        user.setRoleId(null);
+
+        StepVerifier.create(adapter.save(user))
+                .expectErrorMatches(err -> err instanceof IllegalArgumentException &&
+                        err.getMessage().equals("El roleId es obligatorio"))
                 .verify();
-
-        verifyNoInteractions(repository);
-        verifyNoInteractions(roleRepository);
     }
 
     @Test
-    void save_roleNotExists_errors() {
-        var u = buildUser("ana@example.com", 9L);
-        when(roleRepository.existsById(9L)).thenReturn(Mono.just(false));
+    void save_shouldFailWhenRoleIdDoesNotExist() {
+        User user = new User();
+        user.setId(1L);
+        user.setEmail("x@mail.com");
+        user.setRoleId(99L);
 
-        StepVerifier.create(adapter.save(u))
-                .expectErrorMatches(e -> e instanceof IllegalArgumentException &&
-                        e.getMessage().contains("roleId no existe"))
+        when(roleRepository.existsById(99L)).thenReturn(Mono.just(false));
+
+        StepVerifier.create(adapter.save(user))
+                .expectErrorMatches(err -> err instanceof IllegalArgumentException &&
+                        err.getMessage().equals("El roleId no existe: 99"))
                 .verify();
-
-        verify(roleRepository, times(1)).existsById(9L);
-        verifyNoInteractions(repository);
     }
 
     @Test
-    void save_roleExists_mapsAndPersists_ok() {
-        var u = buildUser("ana@example.com", 1L);
-        var entity = new UserEntity(); // usa tu entity real
-        var persisted = new UserEntity(); // simula retorno del repo
-        var mappedDomain = buildUser("ana@example.com", 1L).withId(100L);
+    void save_shouldMapAndPersistUserWhenRoleExists() {
+        User user = new User();
+        user.setId(1L);
+        user.setEmail("ok@mail.com");
+        user.setRoleId(5L);
 
-        when(roleRepository.existsById(1L)).thenReturn(Mono.just(true));
-        when(userEntityMapper.toEntity(u)).thenReturn(entity);
-        when(repository.save(entity)).thenReturn(Mono.just(persisted));
-        when(userEntityMapper.toDomain(persisted)).thenReturn(mappedDomain);
+        UserEntity entity = new UserEntity();
+        entity.setId(1L);
+        entity.setEmail("ok@mail.com");
 
-        StepVerifier.create(adapter.save(u))
-                .expectNextMatches(saved -> saved.getId() != null && saved.getId().equals(100L))
+        User domain = new User();
+        domain.setId(1L);
+        domain.setEmail("ok@mail.com");
+        domain.setRoleId(5L);
+
+        when(roleRepository.existsById(5L)).thenReturn(Mono.just(true));
+        when(userEntityMapper.toEntity(user)).thenReturn(entity);
+        when(repository.save(entity)).thenReturn(Mono.just(entity));
+        when(userEntityMapper.toDomain(entity)).thenReturn(domain);
+
+        StepVerifier.create(adapter.save(user))
+                .expectNextMatches(saved -> saved.getEmail().equals("ok@mail.com") && saved.getRoleId() == 5L)
                 .verifyComplete();
-
-        verify(roleRepository, times(1)).existsById(1L);
-        verify(repository, times(1)).save(entity);
-        verify(userEntityMapper, times(1)).toDomain(persisted);
     }
 }

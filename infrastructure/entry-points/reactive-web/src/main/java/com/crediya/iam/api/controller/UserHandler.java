@@ -4,6 +4,8 @@ import com.crediya.iam.api.dto.ApiResponse;
 import com.crediya.iam.api.dto.UserResponseDto;
 import com.crediya.iam.api.dto.UserSaveDto;
 import com.crediya.iam.api.userMapper.UserMapper;
+import com.crediya.iam.model.user.User;
+import com.crediya.iam.usecase.loadusers.LoadUsersUseCase;
 import com.crediya.iam.usecase.user.IUserUseCase;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoSink;
 
 @Slf4j
 @Component
@@ -21,6 +24,7 @@ import reactor.core.publisher.Mono;
 public class UserHandler {
 
     private final IUserUseCase useCase;
+    private  final LoadUsersUseCase loadUsersUseCase;
     private final UserMapper mapper;
     private final Validator validator;
 
@@ -31,6 +35,22 @@ public class UserHandler {
         }
         return Mono.just(body);
     }
+
+
+    public Mono<ServerResponse> list(ServerRequest request) {
+        final String path = request.path();
+
+        return loadUsersUseCase.execute()
+                .collectList()
+                .flatMap(list -> ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(ApiResponse.ok(list, "Usuarios recuperados", path)))
+                .onErrorResume(e -> ServerResponse.status(500)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(ApiResponse.fail("Error interno del servidor", e.getMessage(), path)));
+    }
+
+
 
     public Mono<ServerResponse> save(ServerRequest request) {
         final String path = request.path();
@@ -77,4 +97,7 @@ public class UserHandler {
         int visible = Math.min(2, doc.length() / 2);
         return doc.substring(0, visible) + "****" + doc.substring(doc.length() - visible);
     }
+
+
+
 }
