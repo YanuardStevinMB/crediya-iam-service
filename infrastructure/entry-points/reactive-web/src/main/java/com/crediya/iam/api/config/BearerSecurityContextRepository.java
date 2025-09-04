@@ -1,10 +1,10 @@
 package com.crediya.iam.api.config;
 
+import com.crediya.iam.security.jwt.JwtReactiveAuthenticationManager;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextImpl;
-import org.springframework.security.oauth2.server.resource.authentication.JwtReactiveAuthenticationManager;
 import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;

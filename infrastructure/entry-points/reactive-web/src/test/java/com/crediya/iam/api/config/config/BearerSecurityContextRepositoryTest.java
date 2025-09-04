@@ -2,6 +2,7 @@ package com.crediya.iam.api.config.config;
 
 
 import com.crediya.iam.api.config.BearerSecurityContextRepository;
+import com.crediya.iam.security.jwt.JwtReactiveAuthenticationManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,7 +12,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.oauth2.server.resource.authentication.JwtReactiveAuthenticationManager;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ServerWebExchange;

@@ -1,8 +1,8 @@
 package com.crediya.iam.config;
 
 import com.crediya.iam.security.jwt.JwtProperties;
+
 import com.crediya.iam.security.jwt.JwtReactiveAuthenticationManager;
-import com.crediya.iam.usecase.authenticate.TokenGeneratorPort;
 import com.crediya.iam.usecase.authenticate.PasswordHasherPort;
 import com.crediya.iam.security.jwt.PasswordHasherAdapter;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
