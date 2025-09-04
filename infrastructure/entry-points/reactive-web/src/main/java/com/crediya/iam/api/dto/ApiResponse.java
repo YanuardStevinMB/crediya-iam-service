@@ -12,7 +12,7 @@ public class ApiResponse<T> {
     private boolean success;
     private String message;
     private T data;
-    private Object errors;    // puede ser String, Map<String,String>, List<FieldError>, etc.
+    private Object errors;
     private String path;
     private Instant timestamp;
 
@@ -45,7 +45,6 @@ public class ApiResponse<T> {
                 .build();
     }
 
-    // Opción B: si quieres conservar 'badRequest(...)' como alias:
     public static ApiResponse<?> badRequest(Object errors, String message, String path) {
         return fail(message, errors, path);
     }

@@ -39,6 +39,12 @@ public final class Messages {
     //Usuarios
     public  static  final  String USERS_NOT_FOUNDS= "Usuarios no encontrados";
     public  static  final  String USERS_NOT_FOUND= "Usuarios no encontrado";
+    public  static  final  String USERS_FOUND= "Usuarios recuperados";
     public  static  final String USER_EXIST ="Ya existe un usuario con el correo";
+    public  static  final String USER_SAVED ="Usuario creado correctamente";
+    public  static  final  String USER_VALIDATED_ERROR = "Validación fallida";
+    public  static  final  String USER_ALREADY_EXIST = "El usuario existe";
+    public  static  final  String USER_NOT_EXIST = "El usuario no existe";
+
 
 }

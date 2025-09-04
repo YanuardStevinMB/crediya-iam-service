@@ -6,6 +6,7 @@ import com.crediya.iam.api.dto.UserSaveDto;
 import com.crediya.iam.api.userMapper.UserMapper;
 import com.crediya.iam.model.user.User;
 import com.crediya.iam.usecase.loadusers.LoadUsersUseCase;
+import com.crediya.iam.usecase.shared.Messages;
 import com.crediya.iam.usecase.user.IUserUseCase;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
@@ -44,10 +45,8 @@ public class UserHandler {
                 .collectList()
                 .flatMap(list -> ServerResponse.ok()
                         .contentType(MediaType.APPLICATION_JSON)
-                        .bodyValue(ApiResponse.ok(list, "Usuarios recuperados", path)))
-                .onErrorResume(e -> ServerResponse.status(500)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .bodyValue(ApiResponse.fail("Error interno del servidor", e.getMessage(), path)));
+                        .bodyValue(ApiResponse.ok(list, Messages.USERS_FOUND, path)));
+
     }
 
 
@@ -72,26 +71,9 @@ public class UserHandler {
                     log.info("[{}] Usuario creado con éxito. id={}", path, dto.getId());
                     return ServerResponse.ok()
                             .contentType(MediaType.APPLICATION_JSON)
-                            .bodyValue(ApiResponse.ok(dto, "Usuario creado correctamente", path));
-                })
-                .onErrorResume(ConstraintViolationException.class, ex -> {
-                    var errors = ex.getConstraintViolations().stream()
-                            .map(v -> new ApiResponse.FieldError(
-                                    v.getPropertyPath().toString(), v.getMessage()))
-                            .toList();
-                    log.warn("[{}] Validación fallida: {}", path, errors);
-                    return ServerResponse.badRequest()
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .bodyValue(ApiResponse.fail("Validación fallida", errors, path));
-                })
-                .onErrorResume(Throwable.class, ex -> {
-
-                    log.error("[{}] Error inesperado creando usuario", path, ex);
-
-                    return ServerResponse.status(500)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .bodyValue(ApiResponse.fail("Error interno del servidor", ex.getMessage(), path));
+                            .bodyValue(ApiResponse.ok(dto, Messages.USER_SAVED, path));
                 });
+
     }
 
     private static String mask(String doc) {

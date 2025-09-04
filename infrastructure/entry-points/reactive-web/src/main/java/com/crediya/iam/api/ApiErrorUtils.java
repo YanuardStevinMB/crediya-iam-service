@@ -10,14 +10,14 @@ import reactor.core.publisher.Mono;
 
 import java.util.Map;
 
-final class ApiErrorUtils {
+public final class ApiErrorUtils {
 
     private ApiErrorUtils() { }
 
-    static Mono<ServerResponse> respond(ServerRequest req,
-                                        HttpStatus status,
-                                        String message,
-                                        Object errors) {
+    public static Mono<ServerResponse> respond(ServerRequest req,
+                                               HttpStatus status,
+                                               String message,
+                                               Object errors) {
         var body = ApiResponse.fail(message, errors, req.path());
         return ServerResponse.status(status)
                 .contentType(MediaType.APPLICATION_JSON)
