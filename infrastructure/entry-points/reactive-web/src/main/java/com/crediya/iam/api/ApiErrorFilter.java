@@ -37,9 +37,6 @@ public class ApiErrorFilter implements HandlerFilterFunction<ServerResponse, Ser
                                 "El rol especificado no existe",
                                 Map.of("roleId", ex.getRoleId(), "code", ex.getCode())))
 
-                .onErrorResume(ForeignKeyViolationException.class,
-                        ex -> handleFk(req, ex))
-
                 // === Validaciones y argumentos ===
                 .onErrorResume(SalaryValidateException.class,
                         ex -> respond(req, HttpStatus.BAD_REQUEST, "Salario inválido", ex.getMessage()))
@@ -55,9 +52,7 @@ public class ApiErrorFilter implements HandlerFilterFunction<ServerResponse, Ser
                 // === Unwrap de Reactor ===
                 .onErrorResume(t -> {
                     Throwable e = Exceptions.unwrap(t);
-                    if (e instanceof ForeignKeyViolationException fk) {
-                        return handleFk(req, fk);
-                    }  else if (e instanceof EmailDuplicadoException dupe) {
+                     if (e instanceof EmailDuplicadoException dupe) {
                         return respond(req, HttpStatus.CONFLICT,
                                 "Email duplicado", Map.of("email", dupe.getEmail(), "code", dupe.getCode()));
                     } else if (e instanceof RoleNotFoundException rnfe) {

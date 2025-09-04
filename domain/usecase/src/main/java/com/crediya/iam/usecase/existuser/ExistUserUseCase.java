@@ -2,6 +2,7 @@ package com.crediya.iam.usecase.existuser;
 
 import com.crediya.iam.model.user.gateways.UserRepository;
 import com.crediya.iam.usecase.shared.Messages;
+import com.crediya.iam.usecase.shared.security.ExceptionGeneral;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
@@ -14,8 +15,8 @@ public class ExistUserUseCase {
 
     public Mono<Boolean> execute(String document, String email) {
         if (document == null || email == null) {
-            LOG.warning("Documento o email nulo");
-            return Mono.error(new IllegalArgumentException("Documento o email nulo"));
+            LOG.warning(Messages.DOCUMENT_EMAIL);
+            return Mono.error(new ExceptionGeneral(Messages.DOCUMENT_EMAIL));
         }
 
         return userRepository.existUserForDocument(document)
@@ -37,6 +38,6 @@ public class ExistUserUseCase {
                         ));
                     }
                 })
-                .switchIfEmpty(Mono.error(new IllegalArgumentException("Usuario no encontrado")));
+                .switchIfEmpty(Mono.error(new ExceptionGeneral(Messages.USERS_NOT_FOUND)));
     }
 }

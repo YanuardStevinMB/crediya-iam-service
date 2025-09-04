@@ -33,8 +33,12 @@ public final class Messages {
 
     //Login
     public static final String INVALID_CREDENTIALS        = "Credenciales inválidas";
+    public  static final String DOCUMENT_EMAIL = "Documento o email nulo";
     //role
     public static final String ROLE_NOT_FOUND   = "Rol no encontrado";
     //Usuarios
-    public  static  final  String USERS_NOT_FOUND= "Usuarios no entcontrados";
+    public  static  final  String USERS_NOT_FOUNDS= "Usuarios no encontrados";
+    public  static  final  String USERS_NOT_FOUND= "Usuarios no encontrado";
+    public  static  final String USER_EXIST ="Ya existe un usuario con el correo";
+
 }

@@ -85,7 +85,9 @@ public class UserHandler {
                             .bodyValue(ApiResponse.fail("Validación fallida", errors, path));
                 })
                 .onErrorResume(Throwable.class, ex -> {
+
                     log.error("[{}] Error inesperado creando usuario", path, ex);
+
                     return ServerResponse.status(500)
                             .contentType(MediaType.APPLICATION_JSON)
                             .bodyValue(ApiResponse.fail("Error interno del servidor", ex.getMessage(), path));

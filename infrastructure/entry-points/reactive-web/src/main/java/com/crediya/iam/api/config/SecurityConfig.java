@@ -1,4 +1,4 @@
-package com.crediya.iam.config;
+package com.crediya.iam.api.config;
 
 import com.crediya.iam.security.jwt.JwtProperties;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +9,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
-import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import reactor.core.publisher.Mono;
 
 @Configuration
@@ -36,7 +35,7 @@ public class SecurityConfig {
                                 "/webjars/**",
                                 "/actuator/**").permitAll()
                         // regla de lista
-                        .pathMatchers(HttpMethod.GET, "/api/v1/usuarios").hasAnyRole("ADMIN","ASESOR")
+                        .pathMatchers(HttpMethod.GET, "/api/v1/usuarios").permitAll()
                         // Login abierto
                         .pathMatchers(HttpMethod.POST, "/api/v1/login").permitAll()
                         // Regla por rol
