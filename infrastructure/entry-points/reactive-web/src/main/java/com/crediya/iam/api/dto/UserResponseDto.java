@@ -1,11 +1,15 @@
 package com.crediya.iam.api.dto;
 
-import lombok.Data;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserResponseDto {
     private Long id;
     private String firstName;

@@ -1,0 +1,20 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2025-08-31-seed-roles
+      author: yanuard
+      changes:
+        - sql:
+            comment: Seed de roles por defecto si no existen (MySQL)
+            splitStatements: true
+            sql: |
+              INSERT INTO Rol (nombre, description)
+              SELECT 'ADMIN', 'Administrador del sistema' FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM Rol WHERE nombre = 'ADMIN');
+
+              INSERT INTO Rol (nombre, description)
+              SELECT 'ASESOR', 'Asesor comercial / operador' FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM Rol WHERE nombre = 'ASESOR');
+
+              INSERT INTO Rol (nombre, description)
+              SELECT 'CLIENTE', 'Cliente final que realiza solicitudes' FROM DUAL
+              WHERE NOT EXISTS (SELECT 1 FROM Rol WHERE nombre = 'CLIENTE');

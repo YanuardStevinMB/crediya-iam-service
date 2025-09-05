@@ -6,10 +6,12 @@ import io.r2dbc.pool.ConnectionPool;
 import io.r2dbc.pool.ConnectionPoolConfiguration;
 import io.r2dbc.spi.ConnectionFactory;
 import io.asyncer.r2dbc.mysql.MySqlConnectionConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.Duration;
+@EnableConfigurationProperties(MysqlConnectionProperties.class) // <<— IMPORTANTE
 
 @Configuration
 public class MySQLConnectionPool {

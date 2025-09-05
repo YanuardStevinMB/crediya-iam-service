@@ -1,9 +1,9 @@
 package com.crediya.iam.api.dto;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(name = "ApiResponseUserResponseDto")
 
@@ -48,6 +48,9 @@ public record UserSaveDto(
 
         @NotBlank(message = "El campo 'address' es obligatorio.")
         String address,
+
+        @NotBlank(message = "El campo 'password' es obligatorio.")
+        String password,
 
         @NotNull(message = "El campo 'roleId' es obligatorio.")
         Long roleId

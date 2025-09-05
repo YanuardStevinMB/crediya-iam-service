@@ -22,6 +22,7 @@ public interface UserEntityMapper {
                 .email(domain.getEmail())
                 .baseSalary(domain.getBaseSalary() )
                 .roleId(domain.getRoleId() )
+                .password(domain.getPassword())
                 .build();
     }
 
@@ -36,7 +37,8 @@ public interface UserEntityMapper {
                 entity.getEmail(),
                 entity.getBaseSalary(),
                 entity.getIdentityDocument(),
-                entity.getRoleId()
+                entity.getRoleId(),
+                entity.getPassword()
         );
 
         return user.withId(entity.getId());

@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-unique-documento-identidad
+      author: Yanuard
+      changes:
+        - addUniqueConstraint:
+            tableName: Usuario
+            columnNames: documento_identidad
+            constraintName: uq_usuario_documento

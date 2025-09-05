@@ -1,43 +1,50 @@
 server:
-  port: 8080
-spring:
-  security:
-    user:
-      name: admin
-      password: admin123
+  port: 8081
 
+spring:
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE:local}
+    active: ${SPRING_PROFILES_ACTIVE:local}   # activa "local" por defecto
   application:
-    name: "autenticacion"
+    name: autenticacion
   devtools:
     add-properties: false
-
 
 management:
   endpoints:
     web:
       exposure:
-        include: "health,prometheus"
+        include: health,prometheus
   endpoint:
     health:
       probes:
         enabled: true
+
 cors:
-  allowed-origins: "http://localhost:4200,http://localhost:8080"
+  allowed-origins: "http://localhost:4200,http://localhost:8081"
 
 springdoc:
-  api-docs.path: /v3/api-docs
-  swagger-ui.path: /swagger-ui
-  swagger-ui.operationsSorter: method
-  swagger-ui.tagsSorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui
+    operations-sorter: method
+    tags-sorter: alpha
 
 logging:
   file:
-    name: logs/iam-app.log    # crea (y sobreescribe al arrancar) logs/iam-app.log
+    name: logs/iam-app.log
   level:
     root: INFO
     com.crediya.iam: INFO
     io.r2dbc.mysql: WARN
     org.springframework.r2dbc: INFO
 
+security:
+  jwt:
+    secret: "QnE1T2lXbVRhV3RzR2VOUXlHaFZ2d2dyU2p2a1R2TnM="
+    expiration-sec: 3600
+    issuer: "autenticacion-service"
+    issuer-uri: ""
+
+jwt:
+  json-exp-roles: "/roles"

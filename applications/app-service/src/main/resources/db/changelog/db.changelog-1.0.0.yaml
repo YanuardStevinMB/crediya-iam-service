@@ -1,7 +1,7 @@
 databaseChangeLog:
   - changeSet:
       id: create-table-rol
-      author: manuel
+      author: Yanuard
       changes:
         - createTable:
             tableName: Rol
@@ -30,7 +30,7 @@ databaseChangeLog:
 
   - changeSet:
       id: create-table-usuario
-      author: manuel
+      author: Yanuard
       changes:
         - createTable:
             tableName: Usuario
@@ -75,6 +75,9 @@ databaseChangeLog:
               - column:
                   name: direccion
                   type: VARCHAR(255)
+              - column:
+                  name: password
+                  type: VARCHAR(100)
               - column:
                   name: salario_base
                   type: DECIMAL(15,2)

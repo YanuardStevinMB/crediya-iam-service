@@ -41,6 +41,34 @@ public class UserReactiveRepositoryAdapter extends ReactiveAdapterOperations<
         return repository.existsByEmail(mail.trim().toLowerCase(Locale.ROOT));
     }
 
+    public Mono<User> existUserForDocument(String document) {
+        if (document == null) return Mono.empty();
+
+        return repository.existUserForDocument(document)
+                .doOnSubscribe(s -> log.info("[user.existUserForDocument] executing query for document={}", document))
+                .doOnNext(user -> log.info("[user.existUserForDocument] found=true id={} document={} email={}",
+                        user.getId(), user.getIdentityDocument(), user.getEmail()))
+                .doOnSuccess(user -> {
+                    if (user == null) {
+                        log.info("[user.existUserForDocument] found=false document={}", document);
+                    }
+                })
+                .map(userEntityMapper::toDomain)
+                .doOnSuccess(user -> {
+                    if (user != null) {
+                        log.info("[user.existUserForDocument] mapped to domain: id={} email={}", user.getId(), user.getEmail());
+                    }
+                });
+    }
+
+
+    @Override
+    public Mono<User> findByEmail(String mail) {
+        if(mail== null) return Mono.empty();
+        return repository.findByEmail(mail.trim().toLowerCase(Locale.ROOT));
+
+    }
+
     @Override
     public Mono<User> save(User user) {
         // 1) Validar que el roleId venga y exista en BD

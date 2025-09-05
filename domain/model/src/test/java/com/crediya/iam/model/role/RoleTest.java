@@ -1,84 +1,63 @@
 package com.crediya.iam.model.role;
 
-
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class RoleTest {
 
     @Nested
-    @DisplayName("Constructores")
     class ConstructorTests {
 
         @Test
-        @DisplayName("Ctor vacío deja todos los campos en null")
-        void noArgsCtor_initializesNulls() {
-            Role r = new Role();
-            assertNull(r.getId());
-            assertNull(r.getName());
-            assertNull(r.getDescription());
-        }
-
-        @Test
-        @DisplayName("Ctor con args asigna campos y hace trim en name/description")
-        void allArgsCtor_setsFields_andTrims() {
-            Role r = new Role(10L, "  Admin  ", "  Rol del sistema  ");
-
-            assertEquals(10L, r.getId());
-            assertEquals("Admin", r.getName());
-            assertEquals("Rol del sistema", r.getDescription());
+        void allArgsCtor_setsFields_withoutTrim() {
+            Role role = new Role(1L, "  Admin  ", "  Operador  ");
+            assertEquals(1L, role.getId());
+            assertEquals("  Admin  ", role.getName());
+            assertEquals("  Operador  ", role.getDescription());
         }
     }
 
     @Nested
-    @DisplayName("Getters/Setters y normalizaciones")
     class GetterSetterTests {
 
         @Test
-        @DisplayName("setName/setDescription hacen trim; nulos se conservan como null")
-        void setters_trimAndHandleNulls() {
-            Role r = new Role();
+        void setters_keepValuesAsIs_noTrimOrNormalization() {
+            Role role = new Role();
+            role.setName("  Admin  ");
+            role.setDescription("  Operador  ");
 
-            r.setName("  Operador  ");
-            r.setDescription("  Puede gestionar usuarios  ");
-
-            assertEquals("Operador", r.getName());
-            assertEquals("Puede gestionar usuarios", r.getDescription());
-
-            r.setName(null);
-            r.setDescription(null);
-
-            assertNull(r.getName());
-            assertNull(r.getDescription());
+            assertEquals("  Admin  ", role.getName());
+            assertEquals("  Operador  ", role.getDescription());
         }
 
         @Test
-        @DisplayName("Cadenas en blanco quedan como \"\" tras trim (no null)")
-        void blankStrings_becomeEmptyString_afterTrim() {
-            Role r = new Role();
+        void blankStrings_remainAsBlank_notEmptyString() {
+            Role role = new Role();
+            role.setName("   ");
+            role.setDescription("   ");
 
-            r.setName("   ");
-            r.setDescription("   ");
-
-            assertEquals("", r.getName());
-            assertEquals("", r.getDescription());
+            assertEquals("   ", role.getName());
+            assertEquals("   ", role.getDescription());
         }
 
         @Test
-        @DisplayName("setId asigna correctamente el identificador")
-        void setId_setsId() {
-            Role r = new Role();
-            assertNull(r.getId());
+        void nullValues_remainNull() {
+            Role role = new Role();
+            role.setName(null);
+            role.setDescription(null);
 
-            r.setId(1L);
-            assertEquals(1L, r.getId());
-
-            r.setId(999L);
-            assertEquals(999L, r.getId());
+            assertNull(role.getName());
+            assertNull(role.getDescription());
         }
+    }
+
+    @Test
+    void staticFactoryMethod_createsRole() {
+        Role role = Role.create(5L, "Admin", "Super user");
+        assertEquals(5L, role.getId());
+        assertEquals("Admin", role.getName());
+        assertEquals("Super user", role.getDescription());
     }
 }

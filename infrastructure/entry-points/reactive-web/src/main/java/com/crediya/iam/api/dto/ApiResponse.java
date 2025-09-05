@@ -1,6 +1,6 @@
 package com.crediya.iam.api.dto;
 
-
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
@@ -12,9 +12,16 @@ public class ApiResponse<T> {
     private boolean success;
     private String message;
     private T data;
-    private Object errors;    // puede ser String, Map<String, String>, List<...>, etc.
+    private Object errors;
     private String path;
     private Instant timestamp;
+
+    @Data
+    @AllArgsConstructor
+    public static class FieldError {
+        private String field;
+        private String message;
+    }
 
     public static <T> ApiResponse<T> ok(T data, String message, String path) {
         return ApiResponse.<T>builder()
@@ -36,5 +43,9 @@ public class ApiResponse<T> {
                 .path(path)
                 .timestamp(Instant.now())
                 .build();
+    }
+
+    public static ApiResponse<?> badRequest(Object errors, String message, String path) {
+        return fail(message, errors, path);
     }
 }

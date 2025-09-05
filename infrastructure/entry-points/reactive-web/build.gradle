@@ -1,14 +1,21 @@
 dependencies {
     implementation project(':usecase')
     implementation project(':model')
-    implementation project(':shared')
+    implementation project(':security')
 
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.micrometer:micrometer-registry-prometheus'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation "org.springdoc:springdoc-openapi-starter-webflux-ui:2.5.0"
+
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation "org.mapstruct:mapstruct:$mapstructVersion"
     annotationProcessor "org.mapstruct:mapstruct-processor:$mapstructVersion"
-    implementation "org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.11"
+
+    //implementation "io.swagger.core.v3:swagger-annotations-jakarta:2.2.36"
 
 }
+
+
