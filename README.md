@@ -103,10 +103,47 @@ http://localhost:8080
 - **Formato**: JSON
 - **Descripción**: Especificación completa de la API en formato OpenAPI 3.0
 
-## 🔧 Configuración y Ejecución
+## 🚀 Inicio Rápido con Docker (Recomendado)
+
+### ⚡ Ejecución en Un Solo Comando
+
+**Windows:**
+```cmd
+# Ejecutar script de inicio automático
+start.bat
+```
+
+**Linux/macOS:**
+```bash
+# Iniciar todos los servicios
+docker compose up --build -d
+```
+
+### 🌐 Servicios Disponibles
+
+Tras ejecutar Docker, tendrás acceso a:
+
+| Servicio | URL | Descripción |
+|----------|-----|-------------|
+| **🚀 API REST** | http://localhost:8080 | API principal del sistema |
+| **💚 Health Check** | http://localhost:8080/actuator/health | Estado de la aplicación |
+| **📚 Swagger UI** | http://localhost:8080/swagger-ui | Documentación interactiva de API |
+| **🗄️ Adminer** | http://localhost:8081 | Interfaz web para gestión de BD |
+
+### 📋 Requisitos Docker
+- **Docker**: v20.10 o superior
+- **Docker Compose**: v2.0 o superior
+- **4GB RAM libre**: Mínimo recomendado
+- **Puertos libres**: 8080, 3307, 8081
+
+**📖 Para documentación detallada de Docker, ver: [DOCKER_GUIDE.md](DOCKER_GUIDE.md)**
+
+---
+
+## 🔧 Ejecución Manual (Sin Docker)
 
 ### Requisitos Previos
-- Java 17 o superior
+- Java 21 o superior
 - MySQL 8.0
 - Gradle 7.0+
 
@@ -115,21 +152,36 @@ http://localhost:8080
 SPRING_PROFILES_ACTIVE=local  # Perfil por defecto
 ```
 
-### Ejecución
+### Configuración Manual
 ```bash
-# Clonar el repositorio
+# 1. Clonar el repositorio
 git clone <repository-url>
 cd reto
 
-# Compilar y ejecutar
+# 2. Configurar base de datos MySQL
+# Crear base de datos: crediya_iam
+# Usuario: root, Password: rootpassword
+
+# 3. Compilar y ejecutar
 ./gradlew bootRun
 
 # La aplicación estará disponible en:
-http://localhost:8080
+http://localhost:8081
 ```
 
-### Configuración de Base de Datos
-La configuración de la base de datos se encuentra en `application.yaml`. Asegúrate de tener MySQL corriendo y configurar las credenciales apropiadas.
+### Configuración de Base de Datos Manual
+La configuración de la base de datos se encuentra en `applications/app-service/src/main/resources/application-local.yaml`. 
+
+**Configuración por defecto:**
+```yaml
+adapters:
+  r2dbc:
+    host: localhost
+    port: 3306
+    database: crediya_iam
+    username: root
+    password: rootpassword
+```
 
 ## 🏗️ Arquitectura del Proyecto
 

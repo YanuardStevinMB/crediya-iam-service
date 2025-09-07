@@ -13,6 +13,7 @@ local.properties
 .settings/
 .loadpath
 .recommenders
+.env
 
 # External tool builders
 .externalToolBuilders/
@@ -334,3 +335,18 @@ gradle-app.setting
 # -----
 *.hprof
 build-cache
+
+# ===== DOCKER & ENVIRONMENT VARIABLES =====
+# Environment variables file (contains sensitive data)
+.env
+.env.local
+.env.production
+.env.staging
+.env.test
+
+# Docker volumes data
+volumes/
+
+# Application logs
+logs/*.log
+logs/*.gz

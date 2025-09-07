@@ -1,69 +1,102 @@
-version: '3.8'
 
 services:
-  # Base de datos MySQL
-  mysql-db:
+  mysql-iam:
     image: mysql:8.0
-    container_name: crediya-mysql
+    container_name: crediya-mysql-iam
     restart: unless-stopped
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --innodb-buffer-pool-size=256M
     environment:
-      MYSQL_ROOT_PASSWORD: root_password_123
-      MYSQL_DATABASE: crediya_iam
-      MYSQL_USER: crediya_user
-      MYSQL_PASSWORD: crediya_pass123
-    ports:
-      - "3307:3306"
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      TZ: UTC
     volumes:
-      - mysql_data:/var/lib/mysql
-      - ./docker/init-scripts:/docker-entrypoint-initdb.d
+      - mysql-iam-data:/var/lib/mysql
+
+    ports:
+      - "${MYSQL_PORT}:3306"
     networks:
       - crediya-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_password_123"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+      test: ["CMD-SHELL", "mysqladmin ping -p$${MYSQL_ROOT_PASSWORD} -h 127.0.0.1 --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
       start_period: 30s
 
-  # Aplicación Spring Boot
-  crediya-iam-app:
+  iam-service:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: crediya-iam-service
     restart: unless-stopped
-    ports:
-      - "8080:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - DB_HOST=mysql-db
-      - DB_PORT=3306
-      - DB_NAME=crediya_iam
-      - DB_USERNAME=crediya_user
-      - DB_PASSWORD=crediya_pass123
+      SPRING_PROFILES_ACTIVE: docker
+      SERVER_PORT: 8080
+
+      # R2DBC runtime (se usan también para Liquibase JDBC)
+      ADAPTERS_R2DBC_HOST: mysql-iam
+      ADAPTERS_R2DBC_PORT: 3306
+      ADAPTERS_R2DBC_DATABASE: ${MYSQL_DATABASE}
+      ADAPTERS_R2DBC_USERNAME: ${MYSQL_USER}
+      ADAPTERS_R2DBC_PASSWORD: ${MYSQL_PASSWORD}
+
+      # CORS
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+
+      # Security / JWT
+      SECURITY_JWT_SECRET: ${JWT_SECRET}
+      SECURITY_JWT_EXPIRATION_SEC: ${JWT_EXPIRATION}
+      JWT_ISSUER: ${JWT_ISSUER}
+
+      # Actuator
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info
+      MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED: "true"
+
+      # JVM
+      JAVA_OPTS: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -Djava.security.egd=file:/dev/./urandom"
     depends_on:
-      mysql-db:
+      mysql-iam:
         condition: service_healthy
+    ports:
+      - "${IAM_SERVICE_PORT:-8080}:8080"
     networks:
-      - crediya-network
-    volumes:
-      - app_logs:/app/logs
+      crediya-network:
+        aliases:
+          - iam-service            # nombre DNS “estable” para otros servicios
+          - crediya-iam-service    # alias adicional útil
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/actuator/health || exit 1"]
       interval: 30s
       timeout: 10s
-      retries: 5
+      retries: 3
       start_period: 60s
+    volumes:
+      - ./logs:/app/logs
 
-# Volumes para persistencia de datos
+  adminer:
+    image: adminer:4.8.1
+    container_name: crediya-adminer
+    restart: unless-stopped
+    environment:
+      ADMINER_DEFAULT_SERVER: mysql-iam
+      ADMINER_DESIGN: pepa-linha-dark
+    ports:
+      - "${ADMINER_PORT}:8080"
+    networks:
+      - crediya-network
+    depends_on:
+      - mysql-iam
+
 volumes:
-  mysql_data:
-    name: crediya_mysql_data
-  app_logs:
-    name: crediya_app_logs
+  mysql-iam-data:
+    driver: local
 
-# Red personalizada para comunicación entre servicios
 networks:
   crediya-network:
-    name: crediya-network
-    driver: bridge
+    external: true

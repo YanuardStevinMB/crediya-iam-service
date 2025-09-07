@@ -1,0 +1,32 @@
+server:
+  port: 8080
+
+spring:
+  h2:
+    console:
+      enabled: false
+
+adapters:
+  r2dbc:
+    host: mysql-autenticacion
+    port: 3306
+    database: crediya_autenticacion
+    username: autenticacion
+    password: autenticacion
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+cors:
+  allowed-origins: "http://localhost:4200,http://localhost:8082"
+
+logging:
+  file:
+    name:   # vacío => logs a stdout en contenedor
