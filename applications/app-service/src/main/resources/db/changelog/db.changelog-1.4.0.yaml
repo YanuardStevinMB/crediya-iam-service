@@ -1,0 +1,23 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2025-08-31-seed-usuarios
+      author: yanuard
+      changes:
+        - sql:
+            comment: Seed de un admin, un asesor y un cliente por defecto si no existen (MySQL)
+            splitStatements: true
+            sql: |
+              -- ADMIN
+              INSERT INTO Usuario (id_usuario, nombre, apellido, email, fecha_nacimiento, documento_identidad, telefono, direccion, password, salario_base, id_rol)
+              SELECT 1, 'Carlos', 'García', 'carlos.admin@crediya.com', '1985-04-15', '1002003001', '3001234567', 'Calle 10 #45-23', '$2a$12$fj2u/WftXhFEbTL6mnEis.EEq6ynJqJfwxxi13FEogc7TZcB2z6Mq', 8000000, 1
+              WHERE NOT EXISTS (SELECT 1 FROM Usuario WHERE email = 'carlos.admin@crediya.com');
+              
+              -- ASESOR
+              INSERT INTO Usuario (id_usuario, nombre, apellido, email, fecha_nacimiento, documento_identidad, telefono, direccion, password, salario_base, id_rol)
+              SELECT 2, 'Laura', 'Martínez', 'laura.asesor@crediya.com', '1995-09-10', '2003004001', '3124567890', 'Calle 50 #12-30', '$2a$12$VESQqwDm5/EHwGOqQYgJiO4StjOXzPtJeKSwhUoNMsLtWnYgqGDI2', 2500000, 2
+              WHERE NOT EXISTS (SELECT 1 FROM Usuario WHERE email = 'laura.asesor@crediya.com');
+              
+              -- CLIENTE
+              INSERT INTO Usuario (id_usuario, nombre, apellido, email, fecha_nacimiento, documento_identidad, telefono, direccion, password, salario_base, id_rol)
+              SELECT 3, 'Juan', 'Pérez', 'juan.cliente@crediya.com', '2000-01-05', '3004005001', '3005554444', 'Calle 80 #23-45', '$2a$12$FEpzhh657aQrUy81nc0YAe.DSPREcIVPXy4pCu19VL78KzKrTKPBq', 0, 3
+              WHERE NOT EXISTS (SELECT 1 FROM Usuario WHERE email = 'juan.cliente@crediya.com');

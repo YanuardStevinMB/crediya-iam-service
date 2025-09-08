@@ -3,26 +3,26 @@
 ## 📋 Tabla de Contenidos
 
 - [Introducción](#introducción)
-- [Arquitectura Docker](#arquitectura-docker)
-- [Pre-requisitos](#pre-requisitos)
-- [Configuración Inicial](#configuración-inicial)
-- [Construcción y Ejecución](#construcción-y-ejecución)
-- [Verificación del Sistema](#verificación-del-sistema)
-- [Gestión de la Base de Datos](#gestión-de-la-base-de-datos)
-- [Comandos Útiles](#comandos-útiles)
-- [Troubleshooting](#troubleshooting)
-- [Configuración de Producción](#configuración-de-producción)
+  - [Arquitectura Docker](#arquitectura-docker)
+  - [Pre-requisitos](#pre-requisitos)
+  - [Configuración Inicial](#configuración-inicial)
+  - [Construcción y Ejecución](#construcción-y-ejecución)
+  - [Verificación del Sistema](#verificación-del-sistema)
+  - [Gestión de la Base de Datos](#gestión-de-la-base-de-datos)
+  - [Comandos Útiles](#comandos-útiles)
+  - [Troubleshooting](#troubleshooting)
+  - [Configuración de Producción](#configuración-de-producción)
 
 ## 🌟 Introducción
 
 Este proyecto ha sido completamente dockerizado para facilitar el desarrollo, testing y despliegue del Sistema IAM (Identity and Access Management) de Crediya. La solución incluye:
 
 - **Aplicación Spring Boot** con arquitectura reactiva
-- **Base de datos MySQL 8.4** con inicialización automática
-- **Adminer** para gestión visual de la base de datos
-- **Configuración de red Docker** para comunicación entre servicios
-- **Health checks** para monitoreo automático
-- **Variables de entorno** para configuración flexible
+  - **Base de datos MySQL 8.4** con inicialización automática
+  - **Adminer** para gestión visual de la base de datos
+  - **Configuración de red Docker** para comunicación entre servicios
+  - **Health checks** para monitoreo automático
+  - **Variables de entorno** para configuración flexible
 
 ## 🏗️ Arquitectura Docker
 
@@ -41,10 +41,10 @@ Este proyecto ha sido completamente dockerizado para facilitar el desarrollo, te
 Antes de comenzar, asegúrate de tener instalado:
 
 - **Docker**: v20.10 o superior
-- **Docker Compose**: v2.0 o superior  
-- **Git**: Para clonar el repositorio
-- **4GB RAM libre**: Mínimo recomendado
-- **Puertos disponibles**: 8080, 3307, 8081
+  - **Docker Compose**: v2.0 o superior  
+  - **Git**: Para clonar el repositorio
+  - **4GB RAM libre**: Mínimo recomendado
+  - **Puertos disponibles**: 8080, 3307, 8081
 
 ### Verificar Instalación
 
@@ -147,6 +147,16 @@ docker compose logs -f
 # Ver logs de un servicio específico
 docker compose logs -f iam-service
 ```
+### 2. pruebas de persistencia de datos
+
+```bash
+#Se detiene y elimina solo el contenedor (el volumen se conserva):
+docker compose -f docker-compose.yml down
+
+# Verificar salud de la aplicación
+docker compose -f docker-compose.yml down
+```
+
 
 ### 2. Health Checks
 
@@ -192,12 +202,12 @@ curl -X POST http://localhost:8080/api/v1/usuarios \
 ### Conexión mediante Adminer
 
 1. Abrir http://localhost:8081
-2. Usar las credenciales:
-   - **Sistema**: MySQL
-   - **Servidor**: mysql-iam
-   - **Usuario**: autenticacion
-   - **Contraseña**: (definida en .env)
-   - **Base de datos**: crediya_autenticacion
+   2. Usar las credenciales:
+      - **Sistema**: MySQL
+      - **Servidor**: mysql-iam
+      - **Usuario**: autenticacion
+      - **Contraseña**: (definida en .env)
+      - **Base de datos**: crediya_autenticacion
 
 ### Conexión Directa
 
@@ -211,7 +221,7 @@ docker compose exec mysql-iam mysql -u autenticacion -p crediya_autenticacion
 Los scripts en `docker/init-scripts/` se ejecutan automáticamente:
 
 - `01-init-database.sql`: Crea tablas y estructura básica
-- `02-sample-data.sql`: Inserta datos de ejemplo para testing
+  - `02-sample-data.sql`: Inserta datos de ejemplo para testing
 
 ### Backup y Restore
 
@@ -395,8 +405,8 @@ docker compose exec mysql-iam mysqldump -u autenticacion -p crediya_autenticacio
 Para issues técnicos:
 
 1. **Verificar logs**: `docker compose logs -f`
-2. **Revisar health checks**: `curl http://localhost:8080/actuator/health`
-3. **Consultar documentación**: `http://localhost:8080/swagger-ui`
+   2. **Revisar health checks**: `curl http://localhost:8080/actuator/health`
+   3. **Consultar documentación**: `http://localhost:8080/swagger-ui`
 
 ---
 

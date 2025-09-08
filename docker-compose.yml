@@ -1,4 +1,3 @@
-
 services:
   mysql-iam:
     image: mysql:8.0
@@ -17,7 +16,6 @@ services:
       TZ: UTC
     volumes:
       - mysql-iam-data:/var/lib/mysql
-
     ports:
       - "${MYSQL_PORT}:3306"
     networks:
@@ -68,16 +66,14 @@ services:
     networks:
       crediya-network:
         aliases:
-          - iam-service            # nombre DNS “estable” para otros servicios
-          - crediya-iam-service    # alias adicional útil
+          - iam-service
+          - crediya-iam-service
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost:8080/actuator/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 60s
-    volumes:
-      - ./logs:/app/logs
 
   adminer:
     image: adminer:4.8.1
