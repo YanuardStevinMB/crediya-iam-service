@@ -1,0 +1,38 @@
+spring:
+  liquibase:
+    enabled: true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    change-log: "classpath:db/changelog/db.changelog-master.yaml"
+    # Liquibase usará JDBC URL con variables de entorno del contenedor
+    url: "jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:iam_db}?useUnicode=true&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC&requireSSL=false"
+    user: "${DB_USERNAME:root}"
+    password: "${DB_PASSWORD:password}"
+
+# Configuración de adaptadores R2DBC usando variables de entorno de AWS Secrets Manager
+adapters:
+  r2dbc:
+    host: "${DB_HOST:localhost}"
+    port: "${DB_PORT:3306}"
+    database: "${DB_NAME:iam_db}"
+    username: "${DB_USERNAME:root}"
+    password: "${DB_PASSWORD:password}"
+
+server:
+  port: 8080  # Puerto estándar para contenedores
+
+security:
+  jwt:
+    secret: "${JWT_SECRET}"
+    expiration-sec: 3600
+    issuer: "autenticacion-service"
+    issuer-uri: ""
+
+cors:
+  allowed-origins: "*"  # Configurar apropiadamente según el ALB
+
+logging:
+  level:
+    root: INFO
+    com.crediya.iam: INFO
+    io.r2dbc.mysql: WARN
+    org.springframework.r2dbc: INFO

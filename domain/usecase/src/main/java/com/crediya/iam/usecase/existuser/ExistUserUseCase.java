@@ -6,6 +6,7 @@ import com.crediya.iam.usecase.shared.security.ExceptionGeneral;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
 import java.util.logging.Logger;
 
 @RequiredArgsConstructor
@@ -13,7 +14,7 @@ public class ExistUserUseCase {
     private static final Logger LOG = Logger.getLogger(ExistUserUseCase.class.getName());
     private final UserRepository userRepository;
 
-    public Mono<Boolean> execute(String document, String email) {
+    public Mono<BigDecimal> execute(String document, String email) {
         if (document == null || email == null) {
             LOG.warning(Messages.DOCUMENT_EMAIL);
             return Mono.error(new ExceptionGeneral(Messages.DOCUMENT_EMAIL));
@@ -28,16 +29,17 @@ public class ExistUserUseCase {
                     String inputEmail = email.trim();
 
                     if (storedEmail.equalsIgnoreCase(inputEmail)) {
-                        LOG.info("[ExistUserUseCase] email match, returning true ");
-                        return Mono.just(true);
+                        LOG.info("[ExistUserUseCase] email match, returning baseSalary={} "
+                        );
+                        return Mono.just(user.getBaseSalary()); // ← aquí devuelves el salario
                     } else {
                         LOG.warning(String.format(
                                 "[ExistUserUseCase] email mismatch : input=%s stored=%s",
                                 inputEmail, storedEmail));
-                        return Mono.error(new IllegalArgumentException(Messages.EMAIL_DIFERENT
-                        ));
+                        return Mono.error(new IllegalArgumentException(Messages.EMAIL_DIFERENT));
                     }
                 })
                 .switchIfEmpty(Mono.error(new ExceptionGeneral(Messages.USERS_NOT_FOUND)));
     }
+
 }
