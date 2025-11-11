@@ -18,12 +18,19 @@ spring:
 
 adapters:
   r2dbc:
-    host: "localhost"
+    host: "db-mysql-iam.ctgsccwg4xn2.us-east-2.rds.amazonaws.com"
     port: 3306
-    database: "crediya_iam"
-    username: "root"
-    password: "rootpassword"
+    database: "appdb"
+    username: "admin"
+    password: "MiPassw0rd#2025"
 
+
+security:
+  jwt:
+    secret: "QnE1T2lXbVRhV3RzR2VOUXlHaFZ2d2dyU2p2a1R2TnM="
+    expiration-sec: 3600
+    issuer: "autenticacion-service"
+    issuer-uri: ""
 
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"

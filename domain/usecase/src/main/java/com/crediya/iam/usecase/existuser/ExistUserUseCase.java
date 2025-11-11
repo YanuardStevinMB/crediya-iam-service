@@ -13,6 +13,7 @@ public class ExistUserUseCase {
     private static final Logger LOG = Logger.getLogger(ExistUserUseCase.class.getName());
     private final UserRepository userRepository;
 
+
     public Mono<Boolean> execute(String document, String email) {
         if (document == null || email == null) {
             LOG.warning(Messages.DOCUMENT_EMAIL);
